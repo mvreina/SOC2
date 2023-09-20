@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+
+<div class="d-flex mt-4">
+    <div class="p-2  flex-grow-1"><h3 class="title-type1">Lista de proyectos</h3></div>
+    <div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div>
+</div>
+
+<hr class="rules">
+
+<!-- Sección de Mensajes-->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
+            <div class="table-responsive">
+                <table id="dataTable-projects" class="display nowrap" width="100%">
+                    <caption>Listado de proyectos</caption>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nombre</th>
+                            <th>Fecha inicio</th>
+                            <th>Fecha fin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody-projects"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Custom JS -->
+{% load static %}
+<script src="{% static 'js/projects.js' %}"></script>
+
+{% endblock %}
+
