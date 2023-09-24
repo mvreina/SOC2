@@ -2,34 +2,19 @@
 
 {% block content %}
 
-<h3></h3>
-
-<br>
-
-
-
-
-{% if request.user.is_authenticated %}
-
-    <hr>
-    <h4>
-        {{ user.username | upper }}, bienvenido
-    </h4>
-
-{% else %}
-
 <div class="container home-text">
     <div>
-        <h2 class="display-4 fw-bold">TÍTULO MJ</h2>
+        <h2 class="display-4 fw-bold">ControlNow</h2>
         <div class="d-flex p-2">
             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed non risus. Suspendisse lectus tortor, dignissim sit amet, adipiscing nec, ultricies sed, dolor. Cras elementum ultrices diam. Maecenas ligula massa, varius a, semper congue, euismod non, mi.</p>
         </div>
-        <a href={% url 'login' %} class="btn btn-danger">Ingresar</a>
-        <a href="#" class="btn btn-outline-secondary">Más Información</a>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'projectCreate' %}" class="btn btn-primary">Crear Proyecto <i class="bi bi-plus-lg"></i></a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-danger">Ingresar</a>
+        {% endif %}
+        <a href="{% url 'projects' %}" class="btn btn-outline-secondary">Ir a Proyectos</a>
     </div>
 </div>
-
-
-{% endif %}
 
 {% endblock %}

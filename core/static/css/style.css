@@ -1,0 +1,27 @@
+.home-text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 80px;
+}
+
+.text-centered {
+    text-align: center;
+}
+
+.title-type1 {
+    color: rgb(161, 161, 161);
+}
+
+.rules {
+    color: #dee2e6;
+}
+
+#navbarNav .navbar-nav li.active > a {
+    color: white;
+}
+
+/* #dataBody-projects :hover{
+    background-color: #e3efff;
+}*/
