@@ -32,11 +32,28 @@ def projectsList(request):
     data = {'projects': projects}
     return JsonResponse(data)
 
-# Editar proyecto
+# Ver proyecto
 @login_required
-def projectEditView(UpdateView):
+def projectRead(request, pk):
+    project = Project.objects.get(id=pk)
+    return render(request, 'core/projectRead.html', {'project': project})
+
+class ProjectUpdateView(UpdateView):
     model = Project
-    form_class = Project
+    form_class = ProjectForm
+    template_name = 'core/projectUpdate.html'
+    success_url = reverse_lazy('projects')
+
+    def form_valid(self, form):
+        # Set the author to the currently logged-in user
+        form.instance.createdBy = self.request.user
+        messages.success(self.request, 'Proyecto actualizado correctamente.')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Error al actualizar proyecto.')
+        return self.render_to_response(self.get_context_data(form=form))
+    
 
 
 # Crear proyecto

@@ -11,7 +11,7 @@
         {% if request.user.is_authenticated %}
             <a href="{% url 'projectCreate' %}" class="btn btn-primary">Crear Proyecto <i class="bi bi-plus-lg"></i></a>
         {% else %}
-            <a href="{% url 'projectCreate' %}" class="btn btn-danger">Ingresar</a>
+            <a href="{% url 'login' %}" class="btn btn-danger">Ingresar</a>
         {% endif %}
         <a href="{% url 'projects' %}" class="btn btn-outline-secondary">Ir a Proyectos</a>
     </div>

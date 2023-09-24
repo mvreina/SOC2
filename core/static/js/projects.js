@@ -34,7 +34,7 @@ const projectsList = async() => {
             content += `
                 <tr>
                     <td>${index + 1}</td>
-                    <td><a href="/projects/${project.id}/">${project.name}</a></td>   
+                    <td><a href="/projectRead/${project.id}/">${project.name}</a></td>   
                     <td>${project.startDate}</td>
                     <td>${project.endDate}</td>
                 </tr>
