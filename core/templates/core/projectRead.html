@@ -4,9 +4,11 @@
 
 {% load crispy_forms_tags %}
 
-<div class="d-flex mt-4">
-    <div class="p-2  flex-grow-1"><h3 class="title-type1">Proyecto</h3></div>
-    <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="p-2  flex-grow-1"><h3 class="title-type1">{{ project.name }}</h3></div>
+        <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
+    </div>
 </div>
 
 <hr class="rules">
@@ -23,70 +25,70 @@
 
 <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
 
-
-<div class="mt-4 d-flex justify-content-evenly">
-    <div id="progressProjectSummary" class="card" style="width: 48%">
-        <div class="card-header">Resumen del proyecto</div>
-        <div class="card-body">
-            <h6 class="card-subtitle text-muted mb-2 mt-2">Políticas</h6>
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 75%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">75%</div>
-            </div>
-            <br>
-            <h6 class="card-subtitle text-muted mb-2">Controles</h6>
-            <div class="progress">
-                <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 65%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">65%</div>
-            </div>
-            <br>
-            <h6 class="card-subtitle text-muted mb-2">Evidencias</h6>
-            <div class="progress mb-2">
-                <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+<div class="container">
+    <div class="mt-4 d-flex justify-content-evenly">
+        <div id="progressProjectSummary" class="card" style="width: 48%">
+            <div class="card-header">Resumen del proyecto</div>
+            <div class="card-body">
+                <h6 class="card-subtitle text-muted mb-2 mt-2">Políticas</h6>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 75%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100">75%</div>
+                </div>
+                <br>
+                <h6 class="card-subtitle text-muted mb-2">Controles</h6>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 65%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">65%</div>
+                </div>
+                <br>
+                <h6 class="card-subtitle text-muted mb-2">Evidencias</h6>
+                <div class="progress mb-2">
+                    <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-label="Success striped example" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="formProjectSummary" class="card" style="width: 48%">
-        <div class="card-header">Datos del proyecto</div>
-        <div class="card-body">
-            <h6 class="card-subtitle text-muted mb-2 mt-2">Nombre del proyecto</h6>
-            <h6 class="mb-4">{{ project.name }}</h6>
-            <div class="card mt-2">
-                <div class="card-body flex-column">
-                    <h6 class="card-title text-muted">Período de monitoreo</h6>
-                    <div class="d-flex flex-row justify-content-evenly">
-                        <div class="card" style="width: 48%">
-                            <div class="card-body d-flex justify-content-evenly">
-                                <div>
-                                    <h6 class="card-subtitle text-muted">Fecha inicio</h6>
-                                    <h6 class="card-text">{{ project.startDate|date:"M d, Y" }}</h6>
+        <div id="formProjectSummary" class="card" style="width: 48%">
+            <div class="card-header">Datos del proyecto</div>
+            <div class="card-body">
+                <h6 class="card-subtitle text-muted mb-2 mt-2">Nombre del proyecto</h6>
+                <h6 class="mb-4">{{ project.name }}</h6>
+                <div class="card mt-2">
+                    <div class="card-body flex-column">
+                        <h6 class="card-title text-muted">Período de monitoreo</h6>
+                        <div class="d-flex flex-row justify-content-evenly">
+                            <div class="card" style="width: 48%">
+                                <div class="card-body d-flex justify-content-evenly">
+                                    <div>
+                                        <h6 class="card-subtitle text-muted">Fecha inicio</h6>
+                                        <h6 class="card-text">{{ project.startDate|date:"M d, Y" }}</h6>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="card" style="width: 48%">
-                            <div class="card-body d-flex flex-row justify-content-evenly">
-                                <div>
-                                    <h6 class="card-subtitle text-muted">Fecha fin</h6>
-                                    <h6 class="card-text">{{ project.endDate|date:"M d, Y" }}</h6>
-                                </div>
-                                <div>
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                                        <i class="bi bi-pencil"></i>
-                                        Editar
-                                    </button>
+                            <div class="card" style="width: 48%">
+                                <div class="card-body d-flex flex-row justify-content-evenly">
+                                    <div>
+                                        <h6 class="card-subtitle text-muted">Fecha fin</h6>
+                                        <h6 class="card-text">{{ project.endDate|date:"M d, Y" }}</h6>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                            <i class="bi bi-pencil"></i>
+                                            Editar
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <h6 class="card-text mb-2 mt-4">Contacto Admin</h6>
             </div>
-            <h6 class="card-text mb-2 mt-4">Contacto Admin</h6>
         </div>
     </div>
-    
 </div>
 
-<div class="container mt-4 d-flex">
-    <div class="card" style="width: 100%">
+<div class="container mt-4">
+    <div class="card">
         <div class="card-body">
             <ul class="nav nav-tabs">
                 <li class="nav-item">

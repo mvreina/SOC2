@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_tables2',
     'crispy_forms',
     'crispy_bootstrap5',
     'django.contrib.admin',
@@ -40,12 +41,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core',
+    'multiselectfield',
 ]
 
 CRISPY_ALLOW_TEMPLATE_PACK = 'bootstrap5'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+
+DJANGO_TABLES2_TABLE_ATTRS = {
+    'class': 'table table-striped table-hover',
+    'thead': {
+        'class': 'thead-dark text-center align-middle text-nowrap font-weight-bold',
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
