@@ -5,6 +5,8 @@ from crispy_forms.layout import Layout, Field, Submit
 import django_tables2 as tables
 from django.forms import BaseInlineFormSet, inlineformset_factory
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+
 
 #PROJECT - QUESTION - ANSWER
 class ProjectQuestionForm(forms.ModelForm):
@@ -27,7 +29,7 @@ class ProjectQuestionForm(forms.ModelForm):
 
 #PROJECT
 class ProjectForm(forms.ModelForm):
-    startDate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Fecha inicio')
+    startDate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Fecha inicio', initial=timezone.now)
     endDate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), label='Fecha fin')
 
     class Meta:

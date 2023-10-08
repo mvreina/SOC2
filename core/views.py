@@ -11,6 +11,8 @@ from django.views.generic import CreateView, UpdateView, ListView
 from .forms import ProjectForm, AnswerForm, QuestionForm, ProjectQuestionForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
+import math
+from django.utils import timezone
 
 # Create your views here.
 def home(request):
@@ -62,16 +64,18 @@ class ProjectCreateView(CreateView):
     model = Project
     form_class = ProjectForm
     template_name = 'core/projectCreate.html'
-    success_url = reverse_lazy('projects')
+    success_url = reverse_lazy('projectQuestions')
 
     def form_valid(self, form):
         # Set the author to the currently logged-in user
         form.instance.createdBy = self.request.user
         project = form.save()
+        #self.success_url = '/projectQuestions/' + str(project.id)
+        self.success_url = reverse('projectQuestions', kwargs={'pk': project.id})
         # Create questions
         self.createQuestions(project)
-        messages.success(self.request, 'Proyecto creado correctamente.')
-        return super().form_valid(form)
+        #messages.success(self.request, 'Proyecto creado correctamente.')   
+        return super().form_valid(form) 
 
     def form_invalid(self, form):
         messages.error(self.request, 'Error al crear el proyecto.')
@@ -104,65 +108,74 @@ class AnswerCreateView(CreateView):
 # PROYECTO - PREGUNTAS - RESPUESTAS
 @login_required
 def projectQuestions(request, pk):
-    project = Project.objects.get(id=pk)
-    question = Question.objects.get(orderQuestion=project.numQuestion)
-    answers = Answer.objects.filter(question=question)
-    totalQuestions = 13
-    percentageProgress = round((project.numQuestion / totalQuestions) * 100)
+    try:
+        project = Project.objects.get(id=pk)
+        question = Question.objects.get(orderQuestion=project.numQuestion)
+        answers = Answer.objects.filter(question=question)
+        totalQuestions = 13
+        percentageProgress = math.ceil((project.numQuestion / totalQuestions) * 100)
+        print(project.numQuestion)
 
-
-    if request.method == 'POST':
-        #saveAnswers = request.POST.get("projectQuestions")
-        #print(saveAnswers)
-        projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
-        pq_ids = []
-        
-        #Guardar respuestas
-        for x in projectQuestions:
-            pq_ids.append(request.POST.get(str(x.id)))
-            #print(str(x.id))
-            if request.POST.get(str(x.id)) == None: 
-                x.userAnswer = False 
-            else: 
-                x.userAnswer = True
-            print("Se guardó correctamente el proyecto")
-            x.save()
-
-        #Avanzar a la siguiente respuesta
-        if 'submit_form' in request.POST:
-            pass
-        elif 'next' in request.POST:
-            
-            project.numQuestion += 1
-            project.save()
-            question = Question.objects.get(orderQuestion=project.numQuestion)
-            answers = Answer.objects.filter(question=question)
+        if request.method == 'POST':
+            #saveAnswers = request.POST.get("projectQuestions")
+            #print(saveAnswers)
             projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
-            print("Avanza a la pregunta: " + str(project.numQuestion))
+            pq_ids = []
+            
+            #Guardar respuestas
+            for x in projectQuestions:
+                pq_ids.append(request.POST.get(str(x.id)))
+                #print(str(x.id))
+                if request.POST.get(str(x.id)) == None: 
+                    x.userAnswer = False 
+                else: 
+                    x.userAnswer = True
+                print("Se guardó correctamente el proyecto")
+                x.save()
 
-        
-        #if formProject.is_valid():
-        #    formProject.save()
+            #Avanzar a la siguiente respuesta
+            if 'finish' in request.POST:
+                project.numQuestion += 1
+                project.save()
+                success_url = reverse('projectRead', kwargs={'pk': project.id})
+                return redirect(success_url)
+            elif 'next' in request.POST:
+                
+                project.numQuestion += 1
+                project.save()
+                question = Question.objects.get(orderQuestion=project.numQuestion)
+                answers = Answer.objects.filter(question=question)
+                projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
+                percentageProgress = math.ceil((project.numQuestion / totalQuestions) * 100)
+                print("Avanza a la pregunta: " + str(project.numQuestion))
 
-    else:
-        #projectQuestions = ProjectQuestion.objects.filter(project=project, question=question)
-        #projectQuestions = ProjectQuestionForm(initial={'project': project, 'question': question})
-        projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
+            
+            #if formProject.is_valid():
+            #    formProject.save()
 
-    #print(projectQuestions)
-    #print(projectQuestions.first())
-    #print(projectQuestions.first().answer.values()[0]['text'])
-    #print(list(projectQuestions))
-    #list_projectQuestion = list(projectQuestions)
-    #for x in list_projectQuestion:
-        #print(x.answer.values()[0]['text'])
+        else:
+            #projectQuestions = ProjectQuestion.objects.filter(project=project, question=question)
+            #projectQuestions = ProjectQuestionForm(initial={'project': project, 'question': question})
+            projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
 
-    #for x in projectQuestions:
-    #    print(x.answer.values()[0]['text'])
-    #print(answers.values())
-    context = {'projectQuestions': projectQuestions, 'question': question, 'percentageProgress': percentageProgress, 
-                'totalQuestions': totalQuestions, 'answers': answers, 'project': project}
-    return render(request, 'core/projectQuestions.html', context)
+        #print(projectQuestions)
+        #print(projectQuestions.first())
+        #print(projectQuestions.first().answer.values()[0]['text'])
+        #print(list(projectQuestions))
+        #list_projectQuestion = list(projectQuestions)
+        #for x in list_projectQuestion:
+            #print(x.answer.values()[0]['text'])
+
+        #for x in projectQuestions:
+        #    print(x.answer.values()[0]['text'])
+        #print(answers.values())
+        context = {'projectQuestions': projectQuestions, 'question': question, 'percentageProgress': percentageProgress, 
+                    'totalQuestions': totalQuestions, 'answers': answers, 'project': project}
+        return render(request, 'core/projectQuestions.html', context)
+      
+    except Exception as e:
+        messages.warning(request, "Se produjo una excepción: "+str(e))
+        return redirect('projects')
 
 class ProjectListView(ListView):
     model = Project

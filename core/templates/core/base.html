@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap5.min.css" />
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <title>ControlNow</title>
+    <title>M2J</title>
 </head>
 <body>
 
@@ -23,8 +23,8 @@
           <div class="container-fluid">
             <!-- Logo -->
             <a class="navbar-brand" href={% url 'home' %}>
-              <i class="bi bi-gear-fill"></i>
-              <span class="text-danger">ControlNow</span>
+              <i class="bi bi-building-lock"></i>
+              <span class="text-danger fw-bold">M2J</span>
             </a>
             <!-- Boton de navegacion -->
             <button class="navbar-toggler" type="button"
@@ -43,6 +43,7 @@
               </ul>
               <ul class="navbar-nav ms-auto">
                 {% if request.user.is_authenticated %}
+                          
                 <li class="nav-item">
                   <a class="nav-link" href={% url 'exit' %}>Salir</a>
                 </li>
@@ -50,7 +51,6 @@
                 <li class="nav-item">
                   <a class="nav-link" href={% url 'login' %}>Ingresar</a>
                 </li>
-                <br>
                 <li class="nav-item">
                   <a class="nav-link" href={% url 'register' %}>Registrarse</a>
                 </li>
