@@ -3,39 +3,46 @@
 {% block content %}
 
 {% load crispy_forms_tags %}
-
-<div class="d-flex mt-4">
-    <div class="p-2  flex-grow-1"><h3 class="title-type1">Nuevo proyecto</h3></div>
-    <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="p-2  flex-grow-1"><h3 class="title-type1">Nuevo proyecto</h3></div>
+        <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
+    </div>
 </div>
 
 <hr class="rules">
 
+
+<div class="container">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="card mx-auto  mt-4">
+            <div class="card-body">
+                <h5 class="card-title">Complete todos los campos</h5>
+                {{ form|crispy }}
+                <a href="{% url 'home' %}" class="card-link">Inicio</a>
+                <a href="{% url 'projects' %}" class="card-link">Proyectos</a>
+                <input type="hidden" name="createdBy" value="{{ request.user }}">
+
+                <button class="btn btn-sm btn-primary float-end bi bi-save" type="submit"> Guardar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
 <!-- Sección de Mensajes-->
 {% if messages %}
     {% for message in messages %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div class="container mt-4">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
             {{ message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
+    </div>
     {% endfor %}
 {% endif %}
-
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="card mx-auto  mt-4" style="width: 40rem;">
-        <div class="card-body">
-            <h5 class="card-title">Complete todos los campos</h5>
-            {{ form|crispy }}
-            <a href="{% url 'home' %}" class="card-link">Inicio</a>
-            <a href="{% url 'projects' %}" class="card-link">Proyectos</a>
-            <input type="hidden" name="createdBy" value="{{ request.user }}">
-
-            <button class="btn btn-sm btn-primary float-end" type="submit">Guardar</button>
-    </div>
-</form>
-
-
 
 {% endblock %}
 

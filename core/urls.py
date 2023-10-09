@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from .views import home, projects, projectsList, ProjectCreateView, ProjectUpdateView, projectRead, exit, register
+from .views import home, projects, projectsList, ProjectCreateView, ProjectUpdateView, projectRead, projectQuestions, exit, register
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -26,5 +26,7 @@ urlpatterns = [
     path('projectsList/', projectsList, name='projectsList'),
     path('projectUpdate/<int:pk>/', login_required(ProjectUpdateView.as_view()), name='projectUpdate'),
     path('projects/create/', login_required(ProjectCreateView.as_view()), name='projectCreate'),
-        path('projectRead/<int:pk>/', projectRead, name='projectRead'),
+    path('projectRead/<int:pk>/', projectRead, name='projectRead'),
+    path('projectQuestions/<int:pk>/', projectQuestions, name='projectQuestions'),
+    #path('projectQuestionsUpdate/<int:pk>/', login_required(ProjectQuestionUpdateView.as_view()), name='projectQuestionsUpdate'),
 ]
