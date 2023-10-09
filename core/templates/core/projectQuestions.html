@@ -13,15 +13,7 @@
     </div>
 </div>
 <hr class="rules">
-<!-- Sección de Mensajes-->
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    {% endfor %}
-{% endif %}
+
 
 
 <div class="container mt-4">
@@ -30,7 +22,7 @@
             <div class="row">
                 <div class="col-sm-12 col-md-12 col-lg-12 col-xl-12">
                     <div class="table-responsive">
-                        <form class="" method="post">
+                        <form class="" method="post" name="form">
                             {% csrf_token %}
                             <div class="container">
                                 <div class="d-flex">
@@ -52,7 +44,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
-                                        <th scope="col">PREGUNTA</th>
+                                        <th scope="col">RESPUESTA</th>
                                         {% if question.type == "checkbox" %}
                                             <th class="text-center" scope="col">DESMARCAR</th>
                                         {% else %}
@@ -71,15 +63,15 @@
                                         <td class="text-center">
                                             {% if projectQuestion.answer.values.0.type == 'checkbox' %}
                                                 {% if projectQuestion.userAnswer == True %}
-                                                    <input class="form-check-input" type="checkbox" value="{{ projectQuestion.userAnswer }}" id="flexCheckDefault" checked name="{{ projectQuestion.id }}"></input>
+                                                    <input class="form-check-input" type="checkbox" value="{{ projectQuestion.userAnswer }}" id="{{ projectQuestion.id }}" name="{{ projectQuestion.id }}" checked></input>
                                                 {% else %}
-                                                    <input class="form-check-input" type="checkbox" value="{{ projectQuestion.userAnswer }}" id="flexCheckDefault" name="{{ projectQuestion.id }}"></input>
+                                                    <input class="form-check-input" type="checkbox" value="{{ projectQuestion.userAnswer }}" id="{{ projectQuestion.id }}" name="{{ projectQuestion.id }}"></input>
                                                 {% endif %}
                                             {% else %}
                                                 {% if projectQuestion.userAnswer == True %}
-                                                    <input class="form-check-input" type="radio" value="{{ projectQuestion.userAnswer }}" id="flexRadio" checked name="{{ projectQuestion.id }}"></input>
+                                                    <input class="form-check-input" type="radio" value="{{ projectQuestion.id }}" id="{{ projectQuestion.id }}" name="flexRadioDefault" checked></input>
                                                 {% else %}
-                                                    <input class="form-check-input" type="radio" value="{{ projectQuestion.userAnswer }}" id="flexRadio" name="{{ projectQuestion.id }}"></input>
+                                                    <input class="form-check-input" type="radio" value="{{ projectQuestion.id }}" id="{{ projectQuestion.id }}" name="flexRadioDefault"></input>
                                                 {% endif %}
                                             {% endif %}
                                         </td>
@@ -88,6 +80,7 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                            
                         </form>
                     </div>
                 </div>
@@ -95,5 +88,18 @@
         </div>
     </div>   
 </div>
+
+<!-- Sección de Mensajes-->
+{% if messages %}
+    {% for message in messages %}
+    <div class="container mt-4">
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    {% endfor %}
+{% endif %}
 
 {% endblock %}

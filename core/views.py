@@ -12,7 +12,6 @@ from .forms import ProjectForm, AnswerForm, QuestionForm, ProjectQuestionForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import math
-from django.utils import timezone
 
 # Create your views here.
 def home(request):
@@ -61,6 +60,7 @@ class ProjectUpdateView(UpdateView):
 
 # Crear proyecto
 class ProjectCreateView(CreateView):
+
     model = Project
     form_class = ProjectForm
     template_name = 'core/projectCreate.html'
@@ -78,8 +78,13 @@ class ProjectCreateView(CreateView):
         return super().form_valid(form) 
 
     def form_invalid(self, form):
-        messages.error(self.request, 'Error al crear el proyecto.')
+        messages.warning(self.request, 'No se guardó el proyecto.')
+        print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
+
+
+
+
     
     # Create ProjectQuestion - Relation to Project Question and Answer
     def createQuestions(self, project):
@@ -114,24 +119,53 @@ def projectQuestions(request, pk):
         answers = Answer.objects.filter(question=question)
         totalQuestions = 13
         percentageProgress = math.ceil((project.numQuestion / totalQuestions) * 100)
-        print(project.numQuestion)
+        print("Pregunta actual:", project.numQuestion)
 
         if request.method == 'POST':
             #saveAnswers = request.POST.get("projectQuestions")
             #print(saveAnswers)
             projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
-            pq_ids = []
-            
-            #Guardar respuestas
-            for x in projectQuestions:
-                pq_ids.append(request.POST.get(str(x.id)))
-                #print(str(x.id))
-                if request.POST.get(str(x.id)) == None: 
-                    x.userAnswer = False 
-                else: 
-                    x.userAnswer = True
-                print("Se guardó correctamente el proyecto")
-                x.save()
+            pq_ids = []            
+            #Guardar respuestas tipo checkbox
+            if question.type == 'checkbox':
+                print("Actualizando proyecto con preguntas tipo checkbox")
+                for x in projectQuestions:
+                    pq_ids.append(request.POST.get(str(x.id)))
+                    #print(str(x.id))
+                    #print(request.POST.get(str(x.id)))
+                    if request.POST.get(str(x.id)) == None: 
+                        x.userAnswer = False 
+                    else: 
+                        x.userAnswer = True
+                    print("Se guardó correctamente el proyecto")
+                    x.save()
+            else:
+                #Guardar respuestas tipo radio
+                print("Actualizando proyecto con preguntas tipo radio")
+                selected = request.POST.get('flexRadioDefault')
+                print("selected", selected)
+                print("Type", type(selected))
+                #Si no ha seleccionado nada se muestra un mensaje de información y en la misma pregunta
+                if selected == None:
+                    messages.warning(request, "Por favor, selecciona una respuesta.")
+                    context = {'projectQuestions': projectQuestions, 'question': question, 'percentageProgress': percentageProgress, 
+                    'totalQuestions': totalQuestions, 'answers': answers, 'project': project}
+                    return render(request, 'core/projectQuestions.html', context)
+                else:
+                    #Si seleccionó una respuesta se guarda
+                    for x in projectQuestions:
+                        pq_ids.append(request.POST.get(str(x.id)))
+                        print(x.id)
+                        print(type(x.id))
+                        if str(x.id) == selected: 
+                            x.userAnswer = True 
+                        else: 
+                            x.userAnswer = False
+                        print("Se guardó correctamente el proyecto")
+                        x.save()
+
+            print("pq_ids", pq_ids)
+
 
             #Avanzar a la siguiente respuesta
             if 'finish' in request.POST:
@@ -174,7 +208,8 @@ def projectQuestions(request, pk):
         return render(request, 'core/projectQuestions.html', context)
       
     except Exception as e:
-        messages.warning(request, "Se produjo una excepción: "+str(e))
+        messages.warning(request, "Se produjo una excepción, consulte al Administrador")
+        print("Se produjo una excepción: "+str(e))
         return redirect('projects')
 
 class ProjectListView(ListView):
@@ -212,6 +247,9 @@ def register(request):
             login(request, user)
 
             return redirect('home')
+        else:
+            data['form'] = user_creation_form
+            return render(request, 'registration/register.html', data)
 
 
     return render(request, 'registration/register.html', data)

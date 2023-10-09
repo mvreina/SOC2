@@ -34,7 +34,7 @@ class ProjectInline(admin.TabularInline):
 
 class ProjectQuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'userAnswer', 'orderProjectQuestion')
-    list_filter = ('orderProjectQuestion', 'question', 'answer')
+    list_filter = ('project', 'question', 'answer', 'orderProjectQuestion')
 
 
 admin.site.register(Project, ProjectAdmin)
