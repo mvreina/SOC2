@@ -50,7 +50,7 @@ class ProjectForm(forms.ModelForm):
 
         if start_date and end_date:
             if start_date + relativedelta(months=3) > end_date:
-                raise ValidationError("Por favor, ingresa una fecha fin que sea 3 meses posterior a la fecha de inicio.")
+                raise ValidationError("Por favor, ingrese una fecha fin que sea 3 meses posterior a la fecha de inicio.")
                 #self.add_error('endDate', "Por favor, ingresa una fecha fin que sea 3 meses posterior a la fecha de inicio.")
                 
 #ANSWER

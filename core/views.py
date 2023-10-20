@@ -12,6 +12,19 @@ from .forms import ProjectForm, AnswerForm, QuestionForm, ProjectQuestionForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import math
+#User registration
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.core.mail import EmailMessage
+#Activate
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from six import text_type
+from django.utils.encoding import force_str
 
 # Create your views here.
 def home(request):
@@ -147,7 +160,7 @@ def projectQuestions(request, pk):
                 print("Type", type(selected))
                 #Si no ha seleccionado nada se muestra un mensaje de información y en la misma pregunta
                 if selected == None:
-                    messages.warning(request, "Por favor, selecciona una respuesta.")
+                    messages.warning(request, "Por favor, seleccione una respuesta.")
                     context = {'projectQuestions': projectQuestions, 'question': question, 'percentageProgress': percentageProgress, 
                     'totalQuestions': totalQuestions, 'answers': answers, 'project': project}
                     return render(request, 'core/projectQuestions.html', context)
@@ -226,7 +239,8 @@ def exit(request):
     logout(request)
     return redirect('home')
 
-# User registration
+
+# User registration - queda deprecated - se usa ahora registerEmail
 def register(request):
 
     data = {
@@ -253,3 +267,89 @@ def register(request):
 
 
     return render(request, 'registration/register.html', data)
+
+
+def registerEmail(request):
+
+    data = {
+        'form': CustomUserCreationForm()
+    }
+
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        print("Entra a register_email")
+        if form.is_valid():
+            print("Entra a register_email - is_valid")
+            user = form.save()
+            user.is_active = False  # Mark the user as inactive until they confirm their email
+            user.save()
+            current_site = get_current_site(request)
+            mail_subject = 'Active su cuenta en M2J'
+            message = render_to_string(
+                'registration/activationEmail.html',
+                {
+                    'user': user,
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+                    'token': default_token_generator.make_token(user),
+                },
+            )
+            print(message)
+            email = EmailMessage(mail_subject, message, to=[user.email])
+            email.content_subtype = 'html'
+            emailsend = email.send()
+            print(emailsend)
+            messages.info(request, 'Envió correo electrónico para activar su cuenta.')
+            #Allow access to registration success page
+            request.session['allowed_access'] = True
+            return redirect('registrationSuccess')  # Create this view
+        else:
+            print("Entra a register_email - is_invalid")
+            data['form'] = form
+            return render(request, 'registration/register.html', data)
+            
+    return render(request, 'registration/register.html', data)
+
+
+def activate(request, uidb64, token):
+    try:
+        print("Entra a activate")
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        print("uid", uid)
+        user = User.objects.get(pk=uid)
+        print("user", user)
+        if default_token_generator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            #login(request, user)
+            request.session['allowed_access'] = True
+            return redirect('activationSuccess')
+        else:
+            return redirect('activationFailure')
+    except Exception as e:
+        print("Se produjo una excepción: "+str(e))
+        request.session['allowed_access'] = False
+    return render(request, 'registration/activationInvalid.html')
+
+def activationSuccess(request):
+    return render(request, 'registration/activationSuccess.html')
+
+def activationFailure(request):
+    logout(request)
+    return render(request, 'registration/activationFailure.html')
+
+def registrationSuccess(request):
+    return render(request, 'registration/registrationSuccess.html')
+
+def activationInvalid(request):
+    logout(request)
+    return render(request, 'registration/activationInvalid.html')
+
+def accessDenied(request):
+    return render(request, 'registration/accessDenied.html')
+
+
+
+#404 Not Found
+def pageNotFound(request):
+    return render(request, 'core/404.html', status=404)
