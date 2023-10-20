@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="title-type1">Activación Exitosa</h3>
+    <div class="container mt-4">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        Su activación fue exitosa.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <p>Su cuenta ha sido activada satisfactoriamente. Ud puede ahora <a href="{% url 'login' %}">iniciar sesión</a>.</p>
+</div>
+
+
+{% endblock %}

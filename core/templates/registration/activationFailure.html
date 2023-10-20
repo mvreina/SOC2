@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="title-type1">Activación de Cuenta Fallida</h3>
+    <div class="container mt-4">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        Su activación no fue exitosa.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+    <p>Lo siento, el enlace de activación no es válido o ha expirado. Por favor <a href="{% url 'register' %}">registrarse</a> de nuevo.</p>
+</div>
+
+
+{% endblock %}

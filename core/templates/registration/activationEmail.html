@@ -1,0 +1,14 @@
+
+{% autoescape off %}
+<p>¡Bienvenido a M2J!</p>
+<p>Por favor, dar clic en el enlace a continuación para activar su cuenta:</p>
+
+<a href="{{ protocol }}://{{ domain }}{% url 'activate' uidb64=uid token=token %}">
+    Active su cuenta
+</a>
+
+<p>Si este enlace no funciona, copie y pegue la siguiente URL en el navegador:</p>
+<p>{{ protocol }}://{{ domain }}{% url 'activate' uidb64=uid token=token %}</p>
+
+<p>Gracias por registrarse!</p>
+{% endautoescape %}   
