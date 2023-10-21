@@ -285,6 +285,11 @@ def registerEmail(request):
             user.save()
             current_site = get_current_site(request)
             mail_subject = 'Active su cuenta en M2J'
+            if request.is_secure():
+                protocol = "https"
+            else:
+                protocol = "http"
+
             message = render_to_string(
                 'registration/activationEmail.html',
                 {
@@ -292,6 +297,7 @@ def registerEmail(request):
                     'domain': current_site.domain,
                     'uid': urlsafe_base64_encode(force_bytes(user.pk)),
                     'token': default_token_generator.make_token(user),
+                    'protocol': protocol
                 },
             )
             print(message)
