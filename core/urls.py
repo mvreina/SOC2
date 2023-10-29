@@ -14,25 +14,30 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from django.contrib.auth.decorators import login_required
 from . import views
 from django.views.generic import TemplateView
 
+
+
 urlpatterns = [
+    #Proyectos
     path('', views.home, name='home'),
     path('projects/', views.projects, name='projects'),
-    path('logout/', views.exit, name='exit'),
     path('register/', views.registerEmail, name='register'),
     path('projectsList/', views.projectsList, name='projectsList'),
     path('projectUpdate/<int:pk>/', login_required(views.ProjectUpdateView.as_view()), name='projectUpdate'),
     path('projects/create/', login_required(views.ProjectCreateView.as_view()), name='projectCreate'),
     path('projectRead/<int:pk>/', views.projectRead, name='projectRead'),
     path('projectQuestions/<int:pk>/', views.projectQuestions, name='projectQuestions'),
-    #path('accounts/login/', views.login, name='login'),
-    #path('projectQuestionsUpdate/<int:pk>/', login_required(ProjectQuestionUpdateView.as_view()), name='projectQuestionsUpdate'),
-    #User Registration Email
-    #path('register_email/', views.register_email, name='register_email'),
+    #Documentos
+    #path('edit', views.edit_text, name='edit_text'),
+    path('textUpdate/<int:pk>/', views.TextUpdateView.as_view(), name='textUpdate'),
+    path('textProjectPolicyUpdate/<int:pk>/', login_required(views.TextProjectPolicyUpdateView.as_view()), name='textProjectPolicyUpdate'),
+    path('download/<int:text_id>/', views.download_word_document, name='download_document'),
+    #Usuarios
+    path('logout/', views.exit, name='exit'),
     path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
     path('activate/<str:uidb64>/<str:token>', views.activate, name='activate'),
     path('activationSuccess/', views.activationSuccess, name='activationSuccess'),
@@ -40,5 +45,6 @@ urlpatterns = [
     path('registrationSuccess/', views.registrationSuccess, name='registrationSuccess'),
     path('activationInvalid/', views.activationInvalid, name='activationInvalid'),
     path('accessDenied/', views.accessDenied, name='accessDenied'),
+    path('aboutUs/', views.aboutUs, name='aboutUs'),
     re_path(r'^(?!accounts/login/|admin).*$', views.pageNotFound),
 ]

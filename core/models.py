@@ -1,11 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User  # Import the User model
-from django.utils import timezone
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
-from django.contrib.contenttypes.models import ContentType
-import uuid
+from django.contrib.auth.models import User
 from multiselectfield import MultiSelectField
-
+from ckeditor.fields import RichTextField
 
 
 # PREGUNTAS
@@ -49,8 +45,13 @@ class Answer(models.Model):
         choices=TYPE_CHOICES,
         default='checkbox',
     )
-    text = models.TextField(max_length=500, verbose_name='Texto de la respuesta', null=False, blank=False)
+    text = models.TextField(max_length=610, verbose_name='Texto de la respuesta', null=False, blank=False)
     orderAnswer = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=0)
+    policyOptions = [] 
+    for i in range(1, 33):
+        policyOptions.append((i, f'Política {i}'))
+
+    excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True, default=[1])
     
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
@@ -65,35 +66,20 @@ class Answer(models.Model):
         verbose_name = 'Respuesta'
         verbose_name_plural = 'Respuestas'
 
-def getANSWERS(num):
-    ANSWERS = []
-    for i in range(1, num+1):
-        #ANSWERS.append((str(i), 'Respuesta ' + str(i)))
-        ANSWERS.append((str(i), str(i)))
-
-    print(ANSWERS)
-    return ANSWERS
-
-def getAnswersDefault(num):
-    answers = ""
-    for i in range(1, num+1):
-        answers += str(i)
-        if i < num:
-            answers += ","
-    
-    print(answers)
-    return answers
-
 # PROYECTOS
 class Project(models.Model):
     name = models.CharField(max_length=200, verbose_name='Nombre del proyecto')
     startDate = models.DateField(verbose_name='Fecha inicio')
     endDate = models.DateField(verbose_name='Fecha fin')
     numQuestion = models.PositiveIntegerField(verbose_name='Número de pregunta', null=False, default=1)
-
-    #Preguntas
-    #question1 = MultiSelectField(choices=getANSWERS(5), max_length=11, default=getAnswersDefault(5))
     
+    policyOptions = [] 
+    for i in range(1, 33):
+        policyOptions.append((i, f'Política {i}'))
+
+    excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True)
+    
+
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
@@ -131,41 +117,84 @@ class ProjectQuestion(models.Model):
     
     class Meta:
         verbose_name = 'Proyecto - Preguntas'
-        verbose_name_plural = 'Projectos - Preguntas'
+        verbose_name_plural = 'Proyectos - Preguntas'
 
 
-
-"""
-# PROYECTO - RESPUESTAS
-
-class ProjectAnswer(models.Model):
-    
-    #Relacionados
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Proyecto', related_name='project_answer', null=False, blank=False, default=1)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, verbose_name='Respuesta', related_name='answer_project', null=False, blank=False, default=1)
-    ANSWER_CHOICES = [
-        ('TRUE', 'TRUE'),
-        ('FALSE', 'FALSE'),
-    ]
-    userAnswer = models.CharField(
-        max_length=12,
-        choices=ANSWER_CHOICES,
-        default='TRUE',
-    )
-    #order = models.IntegerField(verbose_name='Orden', null=False, blank=False, default=1)
+#POLITICAS
+class Policy(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Nombre de la política', null=False, blank=False, default='Política')
+    category = models.CharField(max_length=200, verbose_name='Categoría', null=False, blank=False, default='Categoría')
+    orderPolicy = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=0)
     
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
-    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='project_answerCreatedBy', null=False, blank=False, default=1)
-    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='project_answerUpdatedBy', null=False, blank=False, default=1)
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='policyCreatedBy', null=False, blank=False, default=1)
+    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='policyUpdatedBy', null=False, blank=False, default=1)
     
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Política'
+        verbose_name_plural = 'Políticas'
 
+
+# PROYECTO - POLITICAS
+class ProjectPolicy(models.Model):
+    
+    #Relacionados
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Proyecto', null=False, blank=False, default=1)
+    policy = models.ForeignKey(Policy, on_delete=models.CASCADE, verbose_name='Política', null=False, blank=False, default=1)
+        
+    excluded = models.BooleanField(default=False)
+    orderProjectPolicy = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=1)
+    STATUS_CHOICES = [
+        ('borrador', 'Borrador'),
+        ('aprobado', 'Aprobado'),
+        ('deprecado', 'Deprecado'),
+    ]
+    status = models.CharField(
+        max_length=12,
+        choices=STATUS_CHOICES,
+        default='borrador',
+    )
+    
+    #Documento
+    content = RichTextField(blank=True, null=True)
+    fileName = models.CharField(max_length=200, verbose_name='Nombre del archivo', null=False, blank=False, default='Archivo')
+
+    #Datos del sistema
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='project_policyCreatedBy', null=False, blank=False, default=1)
+    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='project_pUpdatedBy', null=False, blank=False, default=1)
     
     def __str__(self):
         return self.project.name
     
     class Meta:
-        verbose_name = 'Proyecto - Respuestas'
-        verbose_name_plural = 'Projectos - Respuestas'
-"""
+        verbose_name = 'Proyecto - Políticas'
+        verbose_name_plural = 'Proyectos - Políticas'
+
+
+
+# DOCUMENTOS
+class Text(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Nombre de la política', null=False, blank=False, default='Política')
+    fileName = models.CharField(max_length=200, verbose_name='Nombre del archivo', null=False, blank=False, default='Archivo')
+    orderText = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=1)
+    content = RichTextField(blank=True, null=True)
+    
+    #Datos del sistema
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='textCreatedBy', null=False, blank=False, default=1)
+    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='textUpdatedBy', null=False, blank=False, default=1)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Documento'
+        verbose_name_plural = 'Documentos'

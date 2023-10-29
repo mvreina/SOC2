@@ -1,0 +1,40 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>About Us</h1>
+    <p>Welcome to our company's "About Us" page. We are dedicated to...</p>
+
+    <h2>Our Team</h2>
+    <p>We have a diverse and talented team of professionals who are passionate about what they do. Meet our team members:</p>
+
+    <div class="team-member">
+        {# img src="{% static 'images/team_member1.jpg' %}" alt="Team Member 1" #}
+        <h3>John Doe</h3>
+        <p>Position: CEO</p>
+    </div>
+
+    <div class="team-member">
+        {# img src="{% static 'images/team_member2.jpg' %}" alt="Team Member 2" #}
+        <h3>Jane Smith</h3>
+        <p>Position: CTO</p>
+    </div>
+
+
+    <!-- Add more team members as needed -->
+
+    <h2>Our Facilities</h2>
+    <p>Our state-of-the-art facilities are equipped with the latest technology to ensure the highest quality products/services:</p>
+
+    {# img src="{% static 'images/facility1.jpg' %}" alt="Facility 1" #}
+    <p>Facility 1 Description</p>
+
+    {# img src="{% static 'images/facility2.jpg' %}" alt="Facility 2" #}
+    <p>Facility 2 Description</p>
+
+    <!-- Add more facility images and descriptions as needed -->
+
+    <h2>Contact Us</h2>
+    <p>If you have any questions or would like to get in touch with us, feel free to contact us through the following methods...</p>
+</div>
+{% endblock %}
