@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Question, Answer, ProjectQuestion
+from .models import Project, Question, Answer, ProjectQuestion, Text, ProjectPolicy
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Submit
 from django.utils import timezone
@@ -7,7 +7,8 @@ from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 
 
-#PROJECT - QUESTION - ANSWER
+
+#PROYECTO - PREGUNTA - RESPUESTA
 class ProjectQuestionForm(forms.ModelForm):
     class Meta:
         model = ProjectQuestion
@@ -25,7 +26,7 @@ class ProjectQuestionForm(forms.ModelForm):
         )
   
 
-#PROJECT
+#PROYECTO
 class ProjectForm(forms.ModelForm):
     print('Fecha actual: ', timezone.now().date())
     startDate = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'format': '%Y-%m-%d'}), initial=str(timezone.now().date()), label='Fecha inicio')
@@ -53,14 +54,27 @@ class ProjectForm(forms.ModelForm):
                 raise ValidationError("Por favor, ingrese una fecha fin que sea 3 meses posterior a la fecha de inicio.")
                 #self.add_error('endDate', "Por favor, ingresa una fecha fin que sea 3 meses posterior a la fecha de inicio.")
                 
-#ANSWER
+#RESPUESTA
 class AnswerForm(forms.ModelForm):
     class Meta:
         model = Answer
         fields = '__all__'
 
-#QUESTION
+#PREGUNTA
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
         fields = '__all__'
+
+#DOCUMENTOS
+class TextForm(forms.ModelForm):
+
+    class Meta:
+        model = Text
+        fields = ['content']
+
+class TextProjectPolicyForm(forms.ModelForm):
+
+    class Meta:
+        model = ProjectPolicy
+        fields = ['content']

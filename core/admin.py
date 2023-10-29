@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Project, Question, Answer, ProjectQuestion
+from .models import Project, Question, Answer, ProjectQuestion, Policy, ProjectPolicy, Text
 
 # Register your models here.
 
@@ -36,8 +36,25 @@ class ProjectQuestionAdmin(admin.ModelAdmin):
     list_display = ('id', 'userAnswer', 'orderProjectQuestion')
     list_filter = ('project', 'question', 'answer', 'orderProjectQuestion')
 
+class PolicyAdmin(admin.ModelAdmin):
+    list_display = ('orderPolicy', 'name', 'category')
+    list_filter = ('category', 'orderPolicy')
+    sortable_by = ('orderPolicy')
+
+class ProjectPolicyAdmin(admin.ModelAdmin):
+    list_display = ('project', 'policy', 'excluded', 'orderProjectPolicy')
+    list_filter = ('project', 'policy', 'excluded')
+    sortable_by = ('orderProjectPolicy')
+
+
+class TextAdmin(admin.ModelAdmin):
+    list_display = ('orderText', 'name', 'fileName')
+    list_filter = ('name', 'orderText')
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(ProjectQuestion, ProjectQuestionAdmin)
+admin.site.register(Policy, PolicyAdmin)
+admin.site.register(ProjectPolicy, ProjectPolicyAdmin)
+admin.site.register(Text, TextAdmin)

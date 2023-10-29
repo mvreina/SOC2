@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.3.0/css/responsive.bootstrap5.min.css" />
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <meta property="og:image" content="{% static 'images/team_member1.jpg' %}">
     <title>M2J</title>
 </head>
 <body>
@@ -39,6 +40,9 @@
                 </li>
                 <li class="nav-item">
                   <a id="a-projects" class="nav-link" href={% url 'projects' %}>Proyectos</a>
+                </li>
+                <li class="nav-item">
+                  <!--a id="a-projects" class="nav-link" href={% url 'aboutUs' %}>Nosotros</a-->
                 </li>
               </ul>
               <ul class="navbar-nav ms-auto">
@@ -71,6 +75,7 @@
     <!-- Custom JS -->
     {% load static %}
     <script src="{% static 'js/base.js' %}"></script>
-    
-</body>
+    <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <script src=" https://cdn.jsdelivr.net/npm/html-docx-js@0.3.1/dist/html-docx.min.js "></script>
+  </body>
 </html>
