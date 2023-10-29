@@ -108,14 +108,17 @@
                             <!--td scope="row">{{ projectPolicy.id }}</td-->
                             <td><a href="/textProjectPolicyUpdate/{{ projectPolicy.id }}/">{{ projectPolicy.policy }}</a></td>
                             <td>{{ projectPolicy.policy.category }}</td>
-                            <td><select class="form-select" name="status" id="id_status">
-                                <option value="borrador" selected="">Borrador</option>
-                              
-                                <option value="aprobado">Aprobado</option>
-                              
-                                <option value="deprecado">Deprecado</option>
-                              
-                              </select></td>
+                            <td>
+                                {% if projectPolicy.status == 'Borrador' %}
+                                <span class="badge rounded-pill bg-secondary">{{ projectPolicy.status }}</span>
+                                {% elif projectPolicy.status == 'Aprobado' %}
+                                <span class="badge rounded-pill bg-primary">{{ projectPolicy.status }}</span>
+                                {% elif projectPolicy.status == 'Deprecado' %}
+                                <span class="badge rounded-pill bg-danger">{{ projectPolicy.status }}</span>
+                                {% else %}
+                                <span class="badge rounded-pill bg-secondary">{{ projectPolicy.status }}</span>
+                                {% endif %}
+                            </td>
                             <!--td><a href="{% url 'download_document' 17 %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i></a></td-->
                             <td><button onclick="downloadDocument('{{ projectPolicy.content|escapejs }}', '{{ projectPolicy.fileName }}');" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i></button></td>
                             <!--div class="p-2"><button onclick="export2Doc3('{{ form.content.value|escapejs }}', '{{ projectpolicy.fileName }}');" class="btn btn-outline-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i> Descargar Política</button></div-->

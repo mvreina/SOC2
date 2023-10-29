@@ -75,6 +75,18 @@ class TextForm(forms.ModelForm):
 
 class TextProjectPolicyForm(forms.ModelForm):
 
+    STATUS_CHOICES = (
+        ('Borrador', 'Borrador'),
+        ('Aprobado', 'Aprobado'),
+        ('Deprecado', 'Deprecado'),
+    )
+
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select form-select-sm'})
+    ) 
+
     class Meta:
         model = ProjectPolicy
-        fields = ['content']
+        fields = ['content', 'status']

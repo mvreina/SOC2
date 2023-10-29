@@ -150,14 +150,15 @@ class ProjectPolicy(models.Model):
     excluded = models.BooleanField(default=False)
     orderProjectPolicy = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=1)
     STATUS_CHOICES = [
-        ('borrador', 'Borrador'),
-        ('aprobado', 'Aprobado'),
-        ('deprecado', 'Deprecado'),
+        ('Borrador', 'Borrador'),
+        ('Aprobado', 'Aprobado'),
+        ('Deprecado', 'Deprecado'),
     ]
     status = models.CharField(
         max_length=12,
         choices=STATUS_CHOICES,
-        default='borrador',
+        default='Borrador',
+        verbose_name='Estado',
     )
     
     #Documento
