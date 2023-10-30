@@ -93,7 +93,6 @@
             <table class="table table-striped table-hover">
                 <thead>
                     <tr>
-                      <th scope="col">#</th>
                       <th scope="col">Política</th>
                       <th scope="col">Categoría</th>
                       <th scope="col">Estado</th>
@@ -104,7 +103,6 @@
                     {% for projectPolicy in projectPolicies %}
                         {% if projectPolicy.excluded == False %}
                         <tr>
-                            <th scope="row">{{ forloop.counter }}</th>
                             <!--td scope="row">{{ projectPolicy.id }}</td-->
                             <td><a href="/textProjectPolicyUpdate/{{ projectPolicy.id }}/">{{ projectPolicy.policy }}</a></td>
                             <td>{{ projectPolicy.policy.category }}</td>
