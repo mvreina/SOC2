@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+import re
 
 class CustomUserCreationForm(UserCreationForm):
 
@@ -52,4 +53,52 @@ class CustomUserCreationForm(UserCreationForm):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError('Este correo electrónico ya está registrado.')
+        
+        if 'javascript' in email:
+            raise forms.ValidationError("Por favor, ingrese un correo electrónico válido.")
+        if 'script' in email:
+            raise forms.ValidationError("Por favor, ingrese un correo electrónico válido.")
+        
+        email = self.cleaned_data.get('email')
+        email = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], email)
+       
         return email
+    
+    def clean_first_name(self):
+        first_name = self.cleaned_data.get('first_name')
+        if 'javascript' in first_name:
+            raise forms.ValidationError("Por favor, ingrese un nombre válido.")
+        if 'script' in first_name:
+            raise forms.ValidationError("Por favor, ingrese un nombre válido.")
+
+        first_name = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], first_name)
+        return first_name
+    
+    def clean_last_name(self):
+        last_name = self.cleaned_data.get('last_name')
+        if 'javascript' in last_name:
+            raise forms.ValidationError("Por favor, ingrese un apellido válido.")
+        if 'script' in last_name:
+            raise forms.ValidationError("Por favor, ingrese un apellido válido.")
+        
+        last_name = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], last_name)
+        return last_name
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError('Este nombre de usuario ya existe.')
+        
+        if 'javascript' in username:
+            raise forms.ValidationError("Por favor, ingrese un nombre de usuario válido.")
+        if 'script' in username:
+            raise forms.ValidationError("Por favor, ingrese un nombre de usuario válido.")
+        
+        username = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], username)
+        return username
+
+
+
+    
+        
+        

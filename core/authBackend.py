@@ -12,7 +12,7 @@ class CustomBackend(ModelBackend):
             login_attempts = cache.get(cache_key, 0)
 
             if login_attempts == 2:
-                print(login_attempts)
+                #print(login_attempts)
                 user = User.objects.filter(username=username).first()
                 user.is_active = False
                 user.save()

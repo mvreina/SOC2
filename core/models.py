@@ -52,6 +52,12 @@ class Answer(models.Model):
         policyOptions.append((i, f'Política {i}'))
 
     excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True, default=[1])
+
+    controlOptions = [] 
+    for i in range(1, 409):
+        controlOptions.append((i, f'Control {i}'))
+
+    excludedControls = MultiSelectField(choices=controlOptions, max_length=100, verbose_name='Controles excluidos', blank=True, null=True)
     
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
@@ -79,6 +85,13 @@ class Project(models.Model):
 
     excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True)
     
+    controlOptions = [] 
+    for i in range(1, 409):
+        controlOptions.append((i, f'Control {i}'))
+
+    excludedControls = MultiSelectField(choices=controlOptions, max_length=200, verbose_name='Controles excluidos', blank=True, null=True)
+    
+
 
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
@@ -152,10 +165,10 @@ class ProjectPolicy(models.Model):
     STATUS_CHOICES = [
         ('Borrador', 'Borrador'),
         ('Aprobado', 'Aprobado'),
-        ('Deprecado', 'Deprecado'),
+        ('Descontinuado', 'Descontinuado'),
     ]
     status = models.CharField(
-        max_length=12,
+        max_length=13,
         choices=STATUS_CHOICES,
         default='Borrador',
         verbose_name='Estado',
@@ -178,6 +191,52 @@ class ProjectPolicy(models.Model):
         verbose_name = 'Proyecto - Políticas'
         verbose_name_plural = 'Proyectos - Políticas'
 
+
+#CONTROLES
+class Control(models.Model):
+    name = models.CharField(max_length=200, verbose_name='Nombre del control', null=False, blank=False, default='Control')
+    description = models.CharField(max_length=450, verbose_name='Descripción Breve', null=False, blank=False, default='Descripción')
+    moreThanOnePolicy = models.BooleanField(default=False, verbose_name='¿Aplica en más de una Política?')
+    howMany = models.PositiveIntegerField(verbose_name='¿Cuantas?', null=False, blank=False, default=1)
+    policy = models.ForeignKey(Policy, on_delete=models.CASCADE, verbose_name='Política', null=False, blank=False, default=1)
+    orderControl = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=0)
+    
+    #Datos del sistema
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='controlCreatedBy', null=False, blank=False, default=1)
+    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='controlUpdatedBy', null=False, blank=False, default=1)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        verbose_name = 'Control'
+        verbose_name_plural = 'Controles'
+
+
+# PROYECTO - POLITICAS
+class ProjectControl(models.Model):
+    
+    #Relacionados
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Proyecto', null=False, blank=False, default=1)
+    control = models.ForeignKey(Control, on_delete=models.CASCADE, verbose_name='Control', null=False, blank=False, default=1)
+        
+    excluded = models.BooleanField(default=False)
+    orderProjectControl = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=1)
+
+    #Datos del sistema
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Fecha de edición')
+    createdBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Creado por', related_name='project_controlCreatedBy', null=False, blank=False, default=1)
+    updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='project_controlUpdatedBy', null=False, blank=False, default=1)
+    
+    def __str__(self):
+        return self.project.name
+    
+    class Meta:
+        verbose_name = 'Proyecto - Controles'
+        verbose_name_plural = 'Proyectos - Controles'
 
 
 # DOCUMENTOS
