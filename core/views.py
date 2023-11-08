@@ -1,10 +1,9 @@
-from html.parser import HTMLParser
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from .user import CustomUserCreationForm
 from django.contrib.auth import authenticate, login
-from .models import Project, Answer, Question, ProjectQuestion, Policy, ProjectPolicy, Text
+from .models import Project, Answer, Question, ProjectQuestion, Policy, ProjectPolicy, Text, Control, ProjectControl
 from django.http import  JsonResponse
 #from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView, ListView
@@ -12,6 +11,7 @@ from .forms import ProjectForm, TextForm, TextProjectPolicyForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import math
+from django.http import Http404
 #User registration
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -24,18 +24,6 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_str
-#Document
-from django.http import HttpResponse
-from docx import Document
-import io
-import pypandoc
-import tempfile
-import os
-import mammoth
-from bs4 import BeautifulSoup
-from htmldocx import HtmlToDocx
-import aspose.words as aw
-from docx import Document
 
 # Create your views here.
 def home(request):
@@ -58,17 +46,35 @@ def projectsList(request):
     data = {'projects': projects}
     return JsonResponse(data)
 
+
 # Ver proyecto
 @login_required
 def projectRead(request, pk):
-    project = Project.objects.get(id=pk)
-    projectPolicies = ProjectPolicy.objects.filter(project=project).order_by('orderProjectPolicy')
-    totalPolicies = 32
-    excludedPolicies = [int(value) for value in project.excludedPolicies]
-    print(excludedPolicies)
-    print(len(excludedPolicies))
-    progressPolicies = math.ceil(((totalPolicies - len(excludedPolicies)) / totalPolicies) * 100)
-    return render(request, 'core/projectRead.html', {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies})
+    try:
+        project = Project.objects.get(id=pk)
+
+        # Check if the logged-in user is the owner of the resource
+        if request.user == project.createdBy:
+            # Allow access to the resource
+            projectPolicies = ProjectPolicy.objects.filter(project=project).order_by('orderProjectPolicy')
+            totalPolicies = 32
+            excludedPolicies = [int(value) for value in project.excludedPolicies]
+            #print(excludedPolicies)
+            #print(len(excludedPolicies))
+            progressPolicies = math.ceil(((totalPolicies - len(excludedPolicies)) / totalPolicies) * 100)
+            projectControls = ProjectControl.objects.filter(project=project).order_by('orderProjectControl')
+            totalControls = 409
+            excludedControls = [int(value) for value in project.excludedControls]
+            #print(excludedControls)
+            #print(len(excludedControls))
+            progressControls = math.ceil(((totalControls - len(excludedControls)) / totalControls) * 100)
+            return render(request, 'core/projectRead.html', {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies, 'progressControls': progressControls, 'projectControls': projectControls})
+        else:
+            # Deny access
+            raise Http404("Recurso no encontrado")
+        
+    except Project.DoesNotExist:
+        raise Http404("recurso no encontrado")
 
 class ProjectUpdateView(UpdateView):
     model = Project
@@ -109,7 +115,7 @@ class ProjectCreateView(CreateView):
 
     def form_invalid(self, form):
         messages.warning(self.request, 'No se guardó el proyecto.')
-        print(form.errors)
+        #print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
 
     # Crear ProjectQuestion - Es la relación entre Proyecto y Preguntas y Respuestas
@@ -145,7 +151,7 @@ def projectQuestions(request, pk):
         answers = Answer.objects.filter(question=question)
         totalQuestions = 13
         percentageProgress = math.ceil((project.numQuestion / totalQuestions) * 100)
-        print("Pregunta actual:", project.numQuestion)
+        #print("Pregunta actual:", project.numQuestion)
 
         if request.method == 'POST':
             #saveAnswers = request.POST.get("projectQuestions")
@@ -170,12 +176,30 @@ def projectQuestions(request, pk):
                         # Si la politica ya había sido excluida, no se vuelve agregar al proyecto
                         excludedPolicies = [int(value) for value in project.excludedPolicies]
                         answerExcludedPolicies = [int(value) for value in x.answer.values()[0]['excludedPolicies']]
-                        print(excludedPolicies)
-                        print(answerExcludedPolicies)
+                        #print(excludedPolicies)
+                        #print(answerExcludedPolicies)
                         for expl in answerExcludedPolicies:
                             if not expl in excludedPolicies:
                                 project.excludedPolicies += (expl,)
                                 project.save()
+                        # Si el control ya había sido excluido, no se vuelve agregar al proyecto
+                        #print("Paso 1")
+                        excludedControls = [int(value) for value in project.excludedControls]
+                        #print("Paso 2")
+                        answerExcludedControls = [int(value) for value in x.answer.values()[0]['excludedControls']]
+                        #print(excludedControls)
+                        #print("Paso 3")
+                        #print(answerExcludedControls)
+                        #print("Paso 4")
+                        for excl in answerExcludedControls:
+                            #print("Paso 5", excl)
+                            if not excl in excludedControls:
+                                #print("Paso 6", excl)
+                                project.excludedControls += (excl,)
+                                #print("Paso 7")
+                                project.save()
+                            #print("Paso 8")
+                        #print("Paso 9")
                     x.save()
                     #print("Se guardó correctamente el proyectQuestion")
                 #Si no ha seleccionado nada se muestra un mensaje de información y sigue en la misma pregunta
@@ -209,18 +233,28 @@ def projectQuestions(request, pk):
                             # Si la politica ya había sido excluida, no se vuelve agregar al proyecto
                             excludedPolicies = [int(value) for value in project.excludedPolicies]
                             answerExcludedPolicies = [int(value) for value in x.answer.values()[0]['excludedPolicies']]
-                            print(excludedPolicies)
-                            print(answerExcludedPolicies)
+                            #print(excludedPolicies)
+                            #print(answerExcludedPolicies)
                             for expl in answerExcludedPolicies:
                                 if not expl in excludedPolicies:
                                     project.excludedPolicies += (expl,)
                                     project.save()
+                            # Si el control ya había sido excluido, no se vuelve agregar al proyecto
+                            excludedControls = [int(value) for value in project.excludedControls]
+                            answerExcludedControls = [int(value) for value in x.answer.values()[0]['excludedControls']]
+                            #print(excludedControls)
+                            #print(answerExcludedControls)
+                            for excl in answerExcludedControls:
+                                if not excl in excludedControls:
+                                    project.excludedControls += (excl,)
+                                    project.save()
+
                         else: 
                             x.userAnswer = False
-                        print("Se guardó correctamente el proyecto")
+                        #print("Se guardó correctamente el proyecto")
                         x.save()
 
-            print("projectQuestionId", projectQuestionId)
+            #print("projectQuestionId", projectQuestionId)
 
 
             #Avanzar a la siguiente respuesta
@@ -228,7 +262,8 @@ def projectQuestions(request, pk):
                 project.numQuestion += 1
                 project.save()
                 # Crea las politicas y las asocia al proyecto
-                createPolicies(project)
+                createPolicies(project, request.user)
+                createControls(project)
                 success_url = reverse('projectRead', kwargs={'pk': project.id})
                 return redirect(success_url)
             elif 'next' in request.POST:
@@ -239,7 +274,7 @@ def projectQuestions(request, pk):
                 answers = Answer.objects.filter(question=question)
                 projectQuestions = ProjectQuestion.objects.filter(project=project, question=question).order_by('orderProjectQuestion')
                 percentageProgress = math.ceil((project.numQuestion / totalQuestions) * 100)
-                print("Avanza a la pregunta: " + str(project.numQuestion))
+                #print("Avanza a la pregunta: " + str(project.numQuestion))
 
 
         else:
@@ -264,11 +299,11 @@ def projectQuestions(request, pk):
       
     except Exception as e:
         messages.warning(request, "Se produjo una excepción, consulte al Administrador")
-        print("Se produjo una excepción: "+str(e))
+        #print("Se produjo una excepción: "+str(e))
         return redirect('projects')
 
 # Crea las politicas asociadas al proyecto
-def createPolicies(project):
+def createPolicies(project, user):
     policies = Policy.objects.all()
     policyDocuments = Text.objects.all()
     for policy in policies:
@@ -280,9 +315,24 @@ def createPolicies(project):
 
         # Si la política no está en la lista de excluidas el flag excluded es False, sino es True
         if policy.orderPolicy in excludedPolicies:
-            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=True, content=policyText.content, fileName=policyText.fileName)
+            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=True, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user)
         else:
-            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=False, content=policyText.content, fileName=policyText.fileName)
+            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=False, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user)
+
+
+def createControls(project):
+    controls = Control.objects.all()
+    for control in controls:
+        
+        #print("Creando las politicas del proyecto:", project.excludedControls, " - ", control.orderControl)
+        excludedControls = [int(value) for value in project.excludedControls]
+
+        # Si la política no está en la lista de excluidas el flag excluded es False, sino es True
+        if control.orderControl in excludedControls:
+            ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=True)
+        else:
+            ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=False)
+
 
 class ProjectListView(ListView):
     model = Project
@@ -294,54 +344,18 @@ class QuestionListView(ListView):
     model = Question
 
 
-
-### DOCUMENTOS
-"""
-def edit_text(request):
-    if request.method == 'POST':
-        form = TextForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('edit_text')
-    else:
-        form = TextForm()
-
-    return render(request, 'core/textUpdate.html', {'form': form})
-
-    def edit_text(request, text_id):
-    text = get_object_or_404(Text, pk=text_id)
-    
-    if request.method == 'POST':
-            form = TextForm(request.POST)
-            if form.is_valid():
-                form.save()
-                form = TextForm(initial={'content': text.content, 'name': text.name})
-                return render(request, 'core/textUpdate.html', {'form': form})
-            else:
-                form = TextForm(initial={'form': form})
-
-    else:
-        form = TextForm(initial={'content': text.content, 'name': text.name})
-
-    return render(request, 'core/textUpdate.html', {'form': form})
-"""
-
-
-
-
 class TextUpdateView(UpdateView):
     model = Text
     form_class = TextForm
     template_name = 'core/textUpdate.html'
 
     def form_valid(self, form):
-        #modify_docx_document(form.instance.id)
         messages.success(self.request, 'Documento actualizado correctamente.')
         return super().form_valid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, 'Error al actualizar documento.')
-        print(form.errors)
+        #print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
     
     def get_success_url(self):
@@ -353,176 +367,55 @@ class TextProjectPolicyUpdateView(UpdateView):
     form_class = TextProjectPolicyForm
     template_name = 'core/textProjectPolicyUpdate.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        # Check if the user is the owner of the project policy
+        #print("Actualizar Documento")
+        #print("self.object", self.get_object().createdBy)
+        #print("request.user", request.user)
+        projectPolicy = self.get_object()
+        if request.user != projectPolicy.createdBy:
+            raise Http404("Acceso denegado")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
-        #modify_docx_document(form.instance.id)
         messages.success(self.request, 'Documento actualizado correctamente.')
         return super().form_valid(form)
 
     def form_invalid(self, form):
         messages.error(self.request, 'Error al actualizar documento.')
-        print(form.errors)
+        #print(form.errors)
         return self.render_to_response(self.get_context_data(form=form))
     
     def get_success_url(self):
         return reverse('textProjectPolicyUpdate', args=[self.object.pk])
 
-def download_word_document(request, text_id):
+
+### GRÁFICAS
+# Estadísticas de los proyectos
+@login_required
+def projectCharts(request):
+    # Filter by Current User
+    projectsUser = Project.objects.filter(createdBy=request.user)
+    projects = list(projectsUser.values())
+    context = {'projects': projects}
+    return render(request, 'core/projectCharts.html', context)
+
+
+@login_required
+def policiesList(request, projectId):
+    # Filter by Current User
+    projectUser = Project.objects.get(id=projectId)
+    draft = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Borrador", excluded=False)).count()
+    approved = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Aprobado", excluded=False)).count()
+    deprecated = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Descontinuado",excluded=False)).count()
     
-    text = get_object_or_404(Text, pk=text_id)
-
-
-    
-    #htmlToDocx3()
-
-
-
-
-    #docx_document = html_to_docx(text.content)
-    html_content = "<p>This is a simple HTML to DOCX conversion.</p>"
-    output_path = "output.docx"
-    html_to_docx(html_content, output_path)
-
-
-    # Specify the output file path
-    #output_file_path = "WorkingFromHome.docx"
-
-    # Save the modified DOCX document to the output file
-    #docx_document.save(output_file_path)
-
-    # Create an in-memory buffer to store the Word document
-    #buffer = io.BytesIO()
-    #docx_document.save(buffer)
-    #buffer.seek(0)
-
-
-    #response = HttpResponse(buffer.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-    #response = HttpResponse(buffer.read(), content_type='application/msword')
-    #response['Content-Disposition'] = f'attachment; filename={output_file_path}'
-
-
-    #return response
-
-
-def html_to_docx(html_text):
-    # Create a temporary output file
-    with tempfile.NamedTemporaryFile(suffix=".md", delete=False) as tmp_file:
-        tmp_file_path1 = tmp_file.name
-
-    with tempfile.NamedTemporaryFile(suffix=".docx", delete=False) as tmp_file:
-        tmp_file_path2 = tmp_file.name
-
-    # Convert HTML to DOCX and save it to the temporary file
-    #pypandoc.convert_text(html_text, 'md', format='html', outputfile=tmp_file_path1)
-
-    #output = pypandoc.convert_file(tmp_file_path1, 'docx', format='md', outputfile=tmp_file_path2)
-
-    pypandoc.convert_text(html_text, 'docx', format='html', outputfile=tmp_file_path2)
-
-    #pypandoc.convert_text(html_text, 'docx', format='html', outputfile=tmp_file_path)
-
-    # Open the temporary DOCX file
-    #docx_document = Document(tmp_file_path)
-
-    new_parser = HtmlToDocx()
-    new_parser.parse_html_file("text.html", "text.docx")
-
-    docx_document = Document(tmp_file_path2)
-   
-
-    # Clean up the temporary file
-    #os.remove(tmp_file_path)
-
-    return docx_document
-
-
-def htmlToDocx(html_text):
-    # Create a new DOCX document
-    new_doc = Document()
-
-    # Use BeautifulSoup to extract plain text from the HTML
-    soup = BeautifulSoup(html_text, 'html.parser')
-    plain_text = soup.get_text()
-
-    # Split the plain text content by the page break marker
-    text_content_parts = plain_text.split('SALTODELINEA')
-
-    # Iterate through the plain text content parts and add them to the DOCX document
-    for part in text_content_parts:
-        if part.strip():
-            new_doc.add_paragraph(part)
-            new_doc.add_page_break()  # Add a page break after each part
-    
-    return new_doc
-
-def modify_docx_document(text_id):
-    text = get_object_or_404(Text, pk=text_id)
-
-    # Convert HTML to DOCX document
-    docx_document = html_to_docx(text.content)
-
-    # Specify the output file path
-    output_file_path = "modified_word_document.docx"
-
-    # Save the modified DOCX document to the output file
-    docx_document.save(output_file_path)
-
-    # Provide the output file for download
-    with open(output_file_path, 'rb') as f:
-        response = HttpResponse(f.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-        response['Content-Disposition'] = f'attachment; filename={output_file_path}'
-
-def htmToDocx2():
-
-    html_content = "<h1>This is an example HTML content.</h1>"
-    preHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>"
-    postHtml = "</body></html>"
-    
-    html = preHtml + html_content + postHtml
-
-    # Convert HTML to Word
-    result = mammoth.convert(html_content)
-
-    # Prepare the response with the Word document
-    response = HttpResponse(content_type='application/msword')
-    response['Content-Disposition'] = 'attachment; filename=converted.docx'
-    response.write(result.value)
-
-
-def htmlToDocx3():
-    # Load the HTML file from disk
-    doc = aw.Document("text.html")
-
-    # Save the HTML file as Word DOCX document
-    doc.save("html-to-word.docx")
-
-
-
-
-class HTMLToDocxConverter(HTMLParser):
-    def __init__(self):
-        super().__init__()
-        self.doc = Document()
-        self.current_paragraph = None
-
-    def handle_starttag(self, tag, attrs):
-        if tag == 'p':
-            self.current_paragraph = self.doc.add_paragraph()
-
-    def handle_endtag(self, tag):
-        if tag == 'p':
-            self.current_paragraph = None
-
-    def handle_data(self, data):
-        if self.current_paragraph:
-            self.current_paragraph.add_run(data)
-
-def html_to_docx(html_content, output_path):
-    doc = Document()
-    result = mammoth.convert(html_content)
-
-    doc.add_paragraph(result.value)
-    
-    doc.save(output_path)
+    data = {'policies': [
+            ['Políticas', 'Estados'],
+            ['Aprobado', approved],
+            ['Descontinuado', deprecated],
+            ['Borrador', draft],
+        ]}
+    return JsonResponse(data)
 
 ### AUTENTICACIÓN, REGISTRO, VALIDACIÓN DE USUARIOS
 
@@ -569,9 +462,9 @@ def registerEmail(request):
 
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        print("Entra a register_email")
+        #print("Entra a register_email")
         if form.is_valid():
-            print("Entra a register_email - is_valid")
+            #print("Entra a register_email - is_valid")
             user = form.save()
             user.is_active = False  # Mark the user as inactive until they confirm their email
             user.save()
@@ -592,17 +485,17 @@ def registerEmail(request):
                     'protocol': protocol
                 },
             )
-            print(message)
+            #print(message)
             email = EmailMessage(mail_subject, message, to=[user.email])
             email.content_subtype = 'html'
             emailsend = email.send()
-            print(emailsend)
+            #print(emailsend)
             messages.info(request, 'Envió correo electrónico para activar su cuenta.')
             #Allow access to registration success page
             request.session['allowed_access'] = True
             return redirect('registrationSuccess')  # Create this view
         else:
-            print("Entra a register_email - is_invalid")
+            #print("Entra a register_email - is_invalid")
             data['form'] = form
             return render(request, 'registration/register.html', data)
             
@@ -611,11 +504,11 @@ def registerEmail(request):
 
 def activate(request, uidb64, token):
     try:
-        print("Entra a activate")
+        #print("Entra a activate")
         uid = force_str(urlsafe_base64_decode(uidb64))
-        print("uid", uid)
+        #print("uid", uid)
         user = User.objects.get(pk=uid)
-        print("user", user)
+        #print("user", user)
         if default_token_generator.check_token(user, token):
             user.is_active = True
             user.save()
@@ -625,7 +518,7 @@ def activate(request, uidb64, token):
         else:
             return redirect('activationFailure')
     except Exception as e:
-        print("Se produjo una excepción: "+str(e))
+        #print("Se produjo una excepción: "+str(e))
         request.session['allowed_access'] = False
     return render(request, 'registration/activationInvalid.html')
 

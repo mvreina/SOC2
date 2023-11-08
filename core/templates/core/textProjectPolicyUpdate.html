@@ -7,7 +7,7 @@
         {% csrf_token %}
         <div class="container">
             <div class="d-flex mt-4">
-                <div class="p-2  flex-grow-1"><h3 class="title-type1">Editor de política {{ projectpolicy.project.name }}</h3></div>
+                <div class="p-2  flex-grow-1"><h3 class="title-type1">Editor de política {{ projectpolicy.project.name|safe }}</h3></div>
                 <div class="p-2"><button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Guardar Política</button></div>
                 <div class="p-2"><button onclick="export2Doc3('{{ form.content.value|escapejs }}', '{{ projectpolicy.fileName }}');" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i> Descargar Política</button></div>
                 <div class="p-2"><a class="btn btn-primary btn-sm" href="/projectRead/{{ projectpolicy.project.id }}/"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
@@ -69,7 +69,7 @@
     
     function export2Doc3(htmlContent, filename) {
         // Convert HTML to a DOCX document
-        console.log(htmlContent);
+        //console.log(htmlContent);
         var docx = htmlDocx.asBlob(htmlContent, { encoding: 'string' });
 
         // Create a download link and trigger the download

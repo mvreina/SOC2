@@ -14,10 +14,9 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path, re_path, include
+from django.urls import path, re_path
 from django.contrib.auth.decorators import login_required
 from . import views
-from django.views.generic import TemplateView
 
 
 
@@ -31,11 +30,11 @@ urlpatterns = [
     path('projects/create/', login_required(views.ProjectCreateView.as_view()), name='projectCreate'),
     path('projectRead/<int:pk>/', views.projectRead, name='projectRead'),
     path('projectQuestions/<int:pk>/', views.projectQuestions, name='projectQuestions'),
+    path('projectCharts/', views.projectCharts, name='projectCharts'),
+    path('policiesList/<int:projectId>/', views.policiesList, name='policiesList'),
     #Documentos
-    #path('edit', views.edit_text, name='edit_text'),
-    path('textUpdate/<int:pk>/', views.TextUpdateView.as_view(), name='textUpdate'),
+    #path('textUpdate/<int:pk>/', views.TextUpdateView.as_view(), name='textUpdate'),
     path('textProjectPolicyUpdate/<int:pk>/', login_required(views.TextProjectPolicyUpdateView.as_view()), name='textProjectPolicyUpdate'),
-    path('download/<int:text_id>/', views.download_word_document, name='download_document'),
     #Usuarios
     path('logout/', views.exit, name='exit'),
     path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),

@@ -6,7 +6,7 @@
 
 <div class="container">
     <div class="d-flex mt-4">
-        <div class="p-2  flex-grow-1"><h3 class="title-type1">{{ project.name }}</h3></div>
+        <div class="p-2  flex-grow-1"><h3 class="title-type1">{{ project.name|safe }}</h3></div>
         <!-- div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}">Crear Proyecto <i class="bi bi-plus-lg"></i></a></div-->
         <a href="{% url 'home' %}" class="p-2 card-link">Inicio</a>
         <a href="{% url 'projects' %}" class="p-2 card-link">Proyectos</a>
