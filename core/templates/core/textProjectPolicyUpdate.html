@@ -10,7 +10,7 @@
                 <div class="p-2  flex-grow-1"><h3 class="title-type1">Editor de política {{ projectpolicy.project.name|safe }}</h3></div>
                 <div class="p-2"><button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Guardar Política</button></div>
                 <div class="p-2"><button onclick="export2Doc3('{{ form.content.value|escapejs }}', '{{ projectpolicy.fileName }}');" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i> Descargar Política</button></div>
-                <div class="p-2"><a class="btn btn-primary btn-sm" href="/projectRead/{{ projectpolicy.project.id }}/"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
+                <div class="p-2"><a class="btn btn-outline-primary btn-sm" href="/projectRead/{{ projectpolicy.project.id }}/"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
                 <div class="p-2"><label for="id_status">Estado:</label></div>
                 <div class="p-2">{{ form.status }}</div>
             </div>

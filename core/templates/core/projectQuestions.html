@@ -30,7 +30,10 @@
                                     {% if project.numQuestion < totalQuestions %}
                                         <button class="btn btn-primary btn-sm bi bi-arrow-right-square" type="submit" name="next"> Siguiente</button>
                                     {% else %}
-                                        <button class="btn btn-primary btn-sm bi bi-arrow-bar-right" type="submit" name="finish"> Terminar</button>
+                                        <button class="btn btn-primary btn-sm bi bi-arrow-bar-right" type="submit" name="finish" onclick="showSpinner(); makeAjaxRequest();"> 
+                                             Terminar
+                                            <span id="spinner" class="spinner-border spinner-border-sm" aria-hidden="false"style="display: none;"></span>
+                                        </button>
                                     {% endif %}
                                 </div>
                             </div>
@@ -101,5 +104,18 @@
     </div>
     {% endfor %}
 {% endif %}
+
+
+<script>
+    function showSpinner() {
+        document.getElementById('spinner').style.display = 'inline-block';
+    }
+
+    function hideSpinner() {
+        document.getElementById('spinner').style.display = 'none';
+    }
+</script>
+
+
 
 {% endblock %}
