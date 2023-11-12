@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Question, Answer, ProjectQuestion, Text, ProjectPolicy
+from .models import Project, Question, Answer, ProjectQuestion, Text, ProjectPolicy, ProjectControl
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Field, Submit
 from django.utils import timezone
@@ -53,6 +53,9 @@ class ProjectForm(forms.ModelForm):
         if start_date and end_date:
             if start_date + relativedelta(months=3) > end_date:
                 raise ValidationError("Por favor, ingrese una fecha fin que sea 3 meses posterior a la fecha de inicio.")
+                #self.add_error('endDate', "Por favor, ingresa una fecha fin que sea 3 meses posterior a la fecha de inicio.")
+            if start_date + relativedelta(months=24) < end_date:
+                raise ValidationError("Por favor, ingrese una fecha fin que sea máximo 2 años posterior a la fecha de inicio.")
                 #self.add_error('endDate', "Por favor, ingresa una fecha fin que sea 3 meses posterior a la fecha de inicio.")
 
         if 'javascript' in name:
@@ -114,6 +117,35 @@ class TextProjectPolicyForm(forms.ModelForm):
         #content = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], content)
         return content
     
+    def clean_status(self):
+        status = self.cleaned_data.get('status')
+        
+        if 'javascript' in status:
+            raise forms.ValidationError("Por favor, ingrese un estado válido.")
+        if 'script' in status:
+            raise forms.ValidationError("Por favor, ingrese un estado válido.")
+        
+        status = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], status)
+        return status
+    
+class ProjectControlPolicyForm(forms.ModelForm):
+
+    STATUS_CHOICES = (
+        ('Borrador', 'Borrador'),
+        ('Aprobado', 'Aprobado'),
+        ('Descontinuado', 'Descontinuado'),
+    )
+
+    status = forms.ChoiceField(
+        choices=STATUS_CHOICES,
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    ) 
+
+    class Meta:
+        model = ProjectControl
+        fields = ['status']
+
     def clean_status(self):
         status = self.cleaned_data.get('status')
         

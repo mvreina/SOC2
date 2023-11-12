@@ -55,7 +55,7 @@ class TextAdmin(admin.ModelAdmin):
 class ControlAdmin(admin.ModelAdmin):
     list_display = ('orderControl', 'name', 'policy')
     list_filter = ('name', 'orderControl')
-    sortable_by = ('orderControl')
+    sortable_by = ('orderControl', 'name')
 
 class ProjectControlAdmin(admin.ModelAdmin):
     list_display = ('project', 'control', 'excluded', 'orderProjectControl')

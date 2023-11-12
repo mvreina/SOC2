@@ -24,19 +24,22 @@ urlpatterns = [
     #Proyectos
     path('', views.home, name='home'),
     path('projects/', views.projects, name='projects'),
-    path('register/', views.registerEmail, name='register'),
     path('projectsList/', views.projectsList, name='projectsList'),
     path('projectUpdate/<int:pk>/', login_required(views.ProjectUpdateView.as_view()), name='projectUpdate'),
     path('projects/create/', login_required(views.ProjectCreateView.as_view()), name='projectCreate'),
     path('projectRead/<int:pk>/', views.projectRead, name='projectRead'),
+    path('projectRead/<int:pk>/<int:tab>', views.projectRead, name='projectRead'),
     path('projectQuestions/<int:pk>/', views.projectQuestions, name='projectQuestions'),
-    path('projectCharts/', views.projectCharts, name='projectCharts'),
-    path('policiesList/<int:projectId>/', views.policiesList, name='policiesList'),
-    #Documentos
+    #Politicas - Controles
     #path('textUpdate/<int:pk>/', views.TextUpdateView.as_view(), name='textUpdate'),
+    path('policiesList/<int:projectId>/', views.policiesList, name='policiesList'),
     path('textProjectPolicyUpdate/<int:pk>/', login_required(views.TextProjectPolicyUpdateView.as_view()), name='textProjectPolicyUpdate'),
+    path('projectControlPolicyUpdate/<int:pk>/', login_required(views.ProjectControlPolicyUpdateView.as_view()), name='projectControlPolicyUpdate'),
+    #Graficas
+    path('projectCharts/', views.projectCharts, name='projectCharts'),
     #Usuarios
     path('logout/', views.exit, name='exit'),
+    path('register/', views.registerEmail, name='register'),
     path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate'),
     path('activate/<str:uidb64>/<str:token>', views.activate, name='activate'),
     path('activationSuccess/', views.activationSuccess, name='activationSuccess'),

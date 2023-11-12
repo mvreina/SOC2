@@ -1,0 +1,106 @@
+{% extends 'core/base.html' %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="p-2  flex-grow-1">
+            <h3 class="title-type1">Control: {{ projectcontrol.control.name }}</h3>
+        </div>
+        <div class="p-2"><a class="btn btn-outline-primary btn-sm" href="/projectRead/{{ projectcontrol.project.id }}/2"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
+    </div>
+</div>
+<hr class="rules">
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <legend>Control</legend>
+                <div class="mb-3">
+                  <label for="disabledTextInput" class="form-label bold-text">Nombre</label>
+                  <input type="text" id="disabledTextInput" class="form-control" placeholder="{{ projectcontrol.control.name }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label bold-text">Descripción</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="{{ projectcontrol.control.description }}" disabled>
+                </div>
+            
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label bold-text">Estado</label>
+                    <div>{{ form.status }}</div>
+                </div>
+        
+                <div class="mb-2 mt-4 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar</button>
+                </div>
+        
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4 mb-4">
+    <div class="card">
+        <div class="card-body">
+            <legend>Políticas</legend>
+            <div class="mb-3">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <!--th scope="col">#</th-->
+                            <th scope="col">Política</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for projectPolicy in projectcontrol.projectPolicies.all %}
+                        <tr>
+                            <!--td>{{ forloop.counter }}</td-->
+                            <td>
+                                <a href="/textProjectPolicyUpdate/{{ projectPolicy.id }}/">{{ projectPolicy.policy.name }}</a>
+                            </td>
+                            <td>{{ projectPolicy.policy.category }}</td>
+                            <td>
+                                {% if projectPolicy.status == 'Borrador' %}
+                                <span class="badge bg-secondary">{{ projectPolicy.status }}</span>
+                                {% elif projectPolicy.status == 'Aprobado' %}
+                                <span class="badge bg-primary">{{ projectPolicy.status }}</span>
+                                {% elif projectPolicy.status == 'Descontinuado' %}
+                                <span class="badge bg-danger">{{ projectPolicy.status }}</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ projectPolicy.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Sección de Mensajes-->
+{% if messages %}
+{% for message in messages %}
+<div class="container">
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+
+
+
+
+{% endblock %}

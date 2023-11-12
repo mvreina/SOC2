@@ -7,7 +7,7 @@ from .models import Project, Answer, Question, ProjectQuestion, Policy, ProjectP
 from django.http import  JsonResponse
 #from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView, ListView
-from .forms import ProjectForm, TextForm, TextProjectPolicyForm
+from .forms import ProjectForm, TextForm, TextProjectPolicyForm, ProjectControlPolicyForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import math
@@ -49,7 +49,7 @@ def projectsList(request):
 
 # Ver proyecto
 @login_required
-def projectRead(request, pk):
+def projectRead(request, pk, tab=1):
     try:
         project = Project.objects.get(id=pk)
 
@@ -57,18 +57,25 @@ def projectRead(request, pk):
         if request.user == project.createdBy:
             # Allow access to the resource
             projectPolicies = ProjectPolicy.objects.filter(project=project).order_by('orderProjectPolicy')
-            totalPolicies = 32
             excludedPolicies = [int(value) for value in project.excludedPolicies]
+            totalPolicies = projectPolicies.count() - len(excludedPolicies)
+            totalPoliciesApproved = projectPolicies.filter(status='Aprobado').count()
             #print(excludedPolicies)
             #print(len(excludedPolicies))
-            progressPolicies = math.ceil(((totalPolicies - len(excludedPolicies)) / totalPolicies) * 100)
+            progressPolicies = math.ceil((totalPoliciesApproved / totalPolicies) * 100)
             projectControls = ProjectControl.objects.filter(project=project).order_by('orderProjectControl')
-            totalControls = 409
             excludedControls = [int(value) for value in project.excludedControls]
+            totalControls = len(excludedControls)
             #print(excludedControls)
             #print(len(excludedControls))
-            progressControls = math.ceil(((totalControls - len(excludedControls)) / totalControls) * 100)
-            return render(request, 'core/projectRead.html', {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies, 'progressControls': progressControls, 'projectControls': projectControls})
+            totalControlsApproved = projectControls.filter(status='Aprobado').count()
+            progressControls = math.ceil((totalControlsApproved / totalControls) * 100)
+
+            projectSummary = {'totalPolicies': totalPolicies, 'totalPoliciesApproved': totalPoliciesApproved, 'progressPolicies': progressPolicies, 'totalControls': totalControls, 'totalControlsApproved': totalControlsApproved, 'progressControls': progressControls}
+            
+            
+            context = {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies, 'progressControls': progressControls, 'projectControls': projectControls, 'tab': tab, 'summary': projectSummary}
+            return render(request, 'core/projectRead.html', context)
         else:
             # Deny access
             raise Http404("Recurso no encontrado")
@@ -299,7 +306,7 @@ def projectQuestions(request, pk):
       
     except Exception as e:
         messages.warning(request, "Se produjo una excepción, consulte al Administrador")
-        #print("Se produjo una excepción: "+str(e))
+        print("Se produjo una excepción: "+str(e))
         return redirect('projects')
 
 # Crea las politicas asociadas al proyecto
@@ -321,17 +328,55 @@ def createPolicies(project, user):
 
 
 def createControls(project):
+
+    projectControlNames = set()
+
+    for exlControl in project.excludedControls:
+        print(int(exlControl))
+
     controls = Control.objects.all()
     for control in controls:
         
-        #print("Creando las politicas del proyecto:", project.excludedControls, " - ", control.orderControl)
-        excludedControls = [int(value) for value in project.excludedControls]
+        #Ajustar con la política creada para el proyecto y no la de los datos semilla
+        projectPolicy = ProjectPolicy.objects.get(project=project, orderProjectPolicy=control.policy.orderPolicy)
+        #print(projectPolicy, projectPolicy.id)
+        
 
-        # Si la política no está en la lista de excluidas el flag excluded es False, sino es True
-        if control.orderControl in excludedControls:
-            ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=True)
+        if control.name.upper() in projectControlNames:
+            #Agregar política al ProjectControl
+            #Selecciono los controles actuales del proyecto
+            projectControls = ProjectControl.objects.filter(project=project)
+            #print("Agregando Politica al Proyecto")
+            #print(projectControlNames, control.name)
+            #Busco el control del proyecto que tiene el nombre del control actual
+            #print(countPolicy)
+            for projectControl in projectControls:
+                if control.name.upper() == projectControl.control.name.upper():
+                    #Agrego la política al ProjectControl
+                    projectControl.projectPolicies.add(projectPolicy)
+                    projectControl.save()
+                    break
         else:
-            ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=False)
+            #Crea el ProjectControl
+            #excludedControls = [int(value) for value in project.excludedControls]
+            #print("Controls excluidos del proyecto", excludedControls)
+            excluded=False
+            # Si la política no está en la lista de excluidas el flag excluded es False, sino es True
+            #if control.orderControl in excludedControls:
+            #    excluded=True
+            #else:
+            #    excluded=False
+            
+            
+            
+            #print("Creando el Control al Proyecto")
+            projectControl = ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=excluded)
+            projectControl.projectPolicies.add(projectPolicy)
+            projectControl.save()
+            #print("Crear ProjectControl", projectControl)
+            projectControlNames.add(control.name.upper())
+            
+
 
 
 class ProjectListView(ListView):
@@ -388,6 +433,23 @@ class TextProjectPolicyUpdateView(UpdateView):
     
     def get_success_url(self):
         return reverse('textProjectPolicyUpdate', args=[self.object.pk])
+
+class ProjectControlPolicyUpdateView(UpdateView):
+    model = ProjectControl
+    form_class = ProjectControlPolicyForm
+    template_name = 'core/projectControlPolicyUpdate.html'
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Control actualizado correctamente.')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Error al actualizar el control.')
+        #print(form.errors)
+        return self.render_to_response(self.get_context_data(form=form))
+    
+    def get_success_url(self):
+        return reverse('projectControlPolicyUpdate', args=[self.object.pk])
 
 
 ### GRÁFICAS

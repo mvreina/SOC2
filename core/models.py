@@ -54,7 +54,7 @@ class Answer(models.Model):
     excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True, default=[1])
 
     controlOptions = [] 
-    for i in range(1, 409):
+    for i in range(1, 410):
         controlOptions.append((i, f'Control {i}'))
 
     excludedControls = MultiSelectField(choices=controlOptions, max_length=100, verbose_name='Controles excluidos', blank=True, null=True)
@@ -86,7 +86,7 @@ class Project(models.Model):
     excludedPolicies = MultiSelectField(choices=policyOptions, max_length=100, verbose_name='Políticas excluidas', blank=True, null=True)
     
     controlOptions = [] 
-    for i in range(1, 409):
+    for i in range(1, 410):
         controlOptions.append((i, f'Control {i}'))
 
     excludedControls = MultiSelectField(choices=controlOptions, max_length=200, verbose_name='Controles excluidos', blank=True, null=True)
@@ -185,7 +185,7 @@ class ProjectPolicy(models.Model):
     updatedBy = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Actualizado por', related_name='project_pUpdatedBy', null=False, blank=False, default=1)
     
     def __str__(self):
-        return self.project.name
+        return self.project.name+' - '+self.policy.name
     
     class Meta:
         verbose_name = 'Proyecto - Políticas'
@@ -215,15 +215,29 @@ class Control(models.Model):
         verbose_name_plural = 'Controles'
 
 
-# PROYECTO - POLITICAS
+# PROYECTO - POLITICAS - CONTROLES
 class ProjectControl(models.Model):
     
     #Relacionados
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='Proyecto', null=False, blank=False, default=1)
     control = models.ForeignKey(Control, on_delete=models.CASCADE, verbose_name='Control', null=False, blank=False, default=1)
-        
+    #projectPolicy = models.ForeignKey(ProjectPolicy, on_delete=models.CASCADE, verbose_name='Política del proyecto', null=True, blank=True)
+    projectPolicies = models.ManyToManyField(ProjectPolicy)
+       
     excluded = models.BooleanField(default=False)
     orderProjectControl = models.PositiveIntegerField(verbose_name='Orden', null=False, blank=False, default=1)
+    STATUS_CHOICES = [
+        ('Borrador', 'Borrador'),
+        ('Aprobado', 'Aprobado'),
+        ('Descontinuado', 'Descontinuado'),
+    ]
+    status = models.CharField(
+        max_length=13,
+        choices=STATUS_CHOICES,
+        default='Borrador',
+        verbose_name='Estado',
+    )
+
 
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')
