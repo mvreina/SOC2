@@ -162,7 +162,6 @@
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <!--th scope="col">#</th-->
                                 <th scope="col">Control</th>
                                 <th scope="col">Descripción Breve</th>
                                 <th scope="col">Estado</th>
@@ -172,9 +171,8 @@
                         </thead>
                         <tbody>
                             {% for projectControl in projectControls %}
-                            
+                            {% if projectControl.excluded == False %}
                             <tr>
-                                <!--th scope="row">{{ forloop.counter }}</th-->
                                 <td>
                                     <a href="/projectControlPolicyUpdate/{{ projectControl.id }}/">{{ projectControl.control }}</a>
                                 </td>
@@ -200,7 +198,7 @@
                                     </ol>
                                 </td>
                             </tr>
-                            
+                            {% endif %}
                             {% endfor %}
                         </tbody>
                     </table>
@@ -217,22 +215,23 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="staticBackdropLabel">MODAL - MODIFICACIÓN FECHA FIN</h5>
+                <h5 class="modal-title" id="staticBackdropLabel">Modificar fecha fin del proyecto</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                MODAL - MODIFICACIÓN FECHA FIN
-                JUSTIFICACION
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary">Guardar</button>
-            </div>
+            <form action="" method="post">
+                
+                <div class="modal-body">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-
 
 
 <script>
@@ -277,10 +276,6 @@
             });
         });
     });
-
-
-
-
 
 </script>
 

@@ -41,9 +41,17 @@
                 <li class="nav-item">
                   <a id="a-projects" class="nav-link" href={% url 'projects' %}>Proyectos</a>
                 </li>
-                <li class="nav-item">
-                  <a class="nav-link" href={% url 'projectCharts' %}>Estadísticas</a>
-                </li>
+                <div class="dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Estadísticas
+                  </a>
+                
+                  <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><a class="dropdown-item" href={% url 'policiesVsControlsCharts' %}>Políticas vs Controles</a></li>
+                    <li><a class="dropdown-item" href={% url 'projectCharts' %}>Por Proyecto</a></li>
+                    <li><a class="dropdown-item" href={% url 'projectCategoryCharts' %}>Por Categoría</a></li>
+                  </ul>
+                </div>
                 <li class="nav-item">
                   <!--a id="a-projects" class="nav-link" href={% url 'aboutUs' %}>Nosotros</a-->
                 </li>

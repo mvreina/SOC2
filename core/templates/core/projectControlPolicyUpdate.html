@@ -9,7 +9,9 @@
         <div class="p-2  flex-grow-1">
             <h3 class="title-type1">Control: {{ projectcontrol.control.name }}</h3>
         </div>
-        <div class="p-2"><a class="btn btn-outline-primary btn-sm" href="/projectRead/{{ projectcontrol.project.id }}/2"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
+        <div class="p-2"><a class="btn btn-outline-primary btn-sm"
+                href="/projectRead/{{ projectcontrol.project.id }}/2"><i class="bi bi-box-arrow-in-left"></i> Regresar
+                al Proyecto</a></div>
     </div>
 </div>
 <hr class="rules">
@@ -20,23 +22,50 @@
                 {% csrf_token %}
                 <legend>Control</legend>
                 <div class="mb-3">
-                  <label for="disabledTextInput" class="form-label bold-text">Nombre</label>
-                  <input type="text" id="disabledTextInput" class="form-control" placeholder="{{ projectcontrol.control.name }}" disabled>
+                    <label for="disabledTextInput" class="form-label bold-text">Nombre</label>
+                    <input type="text" id="disabledTextInput" class="form-control"
+                        placeholder="{{ projectcontrol.control.name }}" disabled>
                 </div>
                 <div class="mb-3">
                     <label for="disabledTextInput" class="form-label bold-text">Descripción</label>
-                    <input type="text" id="disabledTextInput" class="form-control" placeholder="{{ projectcontrol.control.description }}" disabled>
+                    <input type="text" id="disabledTextInput" class="form-control"
+                        placeholder="{{ projectcontrol.control.description }}" disabled>
                 </div>
-            
+
                 <div class="mb-3">
                     <label for="disabledTextInput" class="form-label bold-text">Estado</label>
                     <div>{{ form.status }}</div>
                 </div>
-        
+
                 <div class="mb-2 mt-4 d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Guardar</button>
+                    <button type="button" class="btn btn-primary"  data-bs-toggle="modal"
+                    data-bs-target="#staticBackdrop"><i class="bi bi-save"></i> Guardar</button>
                 </div>
-        
+
+                <!-- Modal Confirmación de guardado -->
+                <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false"
+                    tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">Confirmación de guardado
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Está seguro de que desea guardar los cambios?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </form>
         </div>
     </div>

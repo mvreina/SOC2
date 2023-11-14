@@ -173,6 +173,7 @@ class ProjectPolicy(models.Model):
         default='Borrador',
         verbose_name='Estado',
     )
+    category = models.CharField(max_length=200, verbose_name='Categoría', null=True, blank=True)
     
     #Documento
     content = RichTextField(blank=True, null=True)
@@ -237,7 +238,7 @@ class ProjectControl(models.Model):
         default='Borrador',
         verbose_name='Estado',
     )
-
+    category = models.CharField(max_length=200, verbose_name='Categoría', null=True, blank=True)
 
     #Datos del sistema
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de creación')

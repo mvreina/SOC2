@@ -1,0 +1,51 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="p-2  flex-grow-1">
+            <h3 class="title-type1">Políticas Vs Controles</h3>
+        </div>
+        <!--div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}"><i class="bi bi-plus-square"></i> Crear Proyecto</a></div-->
+    </div>
+</div>
+
+<hr class="rules">
+
+<!-- Sección de Mensajes-->
+{% if messages %}
+{% for message in messages %}
+<div class="container">
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex flex-row justify-content-evenly">
+                <div id="top_x_div" style="width: 800px; height: 600px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="error-message" style="color: red;"></div>
+
+
+<!-- Google Charts JS -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- Custom JS -->
+{% load static %}
+<script src="{% static 'js/policiesVsControlsCharts.js' %}"></script>
+
+
+
+{% endblock %}
