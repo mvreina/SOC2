@@ -6,6 +6,7 @@ from django.utils import timezone
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ValidationError
 import re
+from django.forms import HiddenInput
     
 
 #PROYECTO - PREGUNTA - RESPUESTA
@@ -68,6 +69,41 @@ class ProjectForm(forms.ModelForm):
         name = re.sub(r'[&<>"\'\?/ ]', lambda x: {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '?': '&#63;', '/': '&#47;', ' ': '&#32;'}[x.group()], name)
         return name
     
+
+
+#PROYECTO - FECHA FIN
+class ProjectEndDateForm(forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(ProjectEndDateForm, self).__init__(*args, **kwargs)
+        self.fields['startDate'].widget = HiddenInput()
+        self.fields['endDate'].widget = forms.DateInput(attrs={'type': 'date', 'format': '%Y-%m-%d'})
+
+   
+    class Meta:
+        model = Project
+        fields = ['endDate', 'startDate']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get("startDate")
+        end_date = cleaned_data.get("endDate")
+
+        if start_date and end_date:
+            if start_date + relativedelta(months=3) > end_date:
+                #raise ValidationError("Por favor, ingrese una fecha fin que sea 3 meses posterior a la fecha de inicio.")
+                self.add_error('endDate', "No se actualizó el proyecto. Por favor, ingrese una fecha fin que sea 3 meses posterior a la fecha de inicio.")
+            if start_date + relativedelta(months=24) < end_date:
+                #raise ValidationError("Por favor, ingrese una fecha fin que sea máximo 2 años posterior a la fecha de inicio.")
+                self.add_error('endDate', "No se actualizó el proyecto. Por favor, ingrese una fecha fin que sea máximo 2 años posterior a la fecha de inicio.")
+
+    def clean_endDate(self):
+        endDate = self.cleaned_data.get('endDate')
+        return endDate
+    
+    def clean_startDate(self):
+        startDate = self.cleaned_data.get('startDate')
+        return startDate
 
 #RESPUESTA
 class AnswerForm(forms.ModelForm):

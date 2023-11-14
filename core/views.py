@@ -7,7 +7,7 @@ from .models import Project, Answer, Question, ProjectQuestion, Policy, ProjectP
 from django.http import  JsonResponse
 #from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView, ListView
-from .forms import ProjectForm, TextForm, TextProjectPolicyForm, ProjectControlPolicyForm
+from .forms import ProjectForm, TextForm, TextProjectPolicyForm, ProjectControlPolicyForm, ProjectEndDateForm
 from django.urls import reverse_lazy, reverse
 from django.contrib import messages
 import math
@@ -24,6 +24,11 @@ from django.core.mail import EmailMessage
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_str
+from django.http import HttpResponse
+
+categories = ['Control de Acceso', 'Gestión de Activos', 'Auditoría y Cumplimiento', 'Continuidad del Negocio', 'Privacidad de Datos', 'Seguridad de Datos',
+                  'Información y Comunicación', 'Organización y Gestión', 'Gestión de Riesgos', 'Seguridad en el Desarrollo del Ciclo de Vida del Software (SDLC)',
+                  'Operaciones de Seguridad']
 
 # Create your views here.
 def home(request):
@@ -52,6 +57,12 @@ def projectsList(request):
 def projectRead(request, pk, tab=1):
     try:
         project = Project.objects.get(id=pk)
+        # Convert the date string to a datetime object
+        # Format the datetime object as a string in the desired format
+        formatted_date_string = project.endDate.strftime("%Y-%m-%d")
+        form = ProjectEndDateForm(initial={'endDate': formatted_date_string, 'startDate': project.startDate})
+
+        
 
         # Check if the logged-in user is the owner of the resource
         if request.user == project.createdBy:
@@ -64,8 +75,8 @@ def projectRead(request, pk, tab=1):
             #print(len(excludedPolicies))
             progressPolicies = math.ceil((totalPoliciesApproved / totalPolicies) * 100)
             projectControls = ProjectControl.objects.filter(project=project).order_by('orderProjectControl')
-            excludedControls = [int(value) for value in project.excludedControls]
-            totalControls = len(excludedControls)
+            excludedControls = projectControls.filter(excluded=True).count()
+            totalControls = projectControls.count() - excludedControls
             #print(excludedControls)
             #print(len(excludedControls))
             totalControlsApproved = projectControls.filter(status='Aprobado').count()
@@ -74,7 +85,21 @@ def projectRead(request, pk, tab=1):
             projectSummary = {'totalPolicies': totalPolicies, 'totalPoliciesApproved': totalPoliciesApproved, 'progressPolicies': progressPolicies, 'totalControls': totalControls, 'totalControlsApproved': totalControlsApproved, 'progressControls': progressControls}
             
             
-            context = {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies, 'progressControls': progressControls, 'projectControls': projectControls, 'tab': tab, 'summary': projectSummary}
+            if request.method == 'POST':
+                #print('Entro al POST')
+                form = ProjectEndDateForm(request.POST)
+                if form.is_valid():
+                    endDate = form.cleaned_data['endDate']
+                    project.endDate = endDate
+                    project.save()
+                    messages.success(request, 'Proyecto actualizado correctamente.')
+                else:
+                    try:
+                        messages.warning(request, form.errors['endDate'])
+                    except KeyError:
+                        pass
+
+            context = {'project': project, 'progressPolicies': progressPolicies, 'projectPolicies': projectPolicies, 'progressControls': progressControls, 'projectControls': projectControls, 'tab': tab, 'summary': projectSummary, 'form': form}
             return render(request, 'core/projectRead.html', context)
         else:
             # Deny access
@@ -322,17 +347,21 @@ def createPolicies(project, user):
 
         # Si la política no está en la lista de excluidas el flag excluded es False, sino es True
         if policy.orderPolicy in excludedPolicies:
-            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=True, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user)
+            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=True, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user, category=policy.category)
         else:
-            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=False, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user)
+            ProjectPolicy.objects.create(project=project, policy=policy, orderProjectPolicy=policy.orderPolicy, excluded=False, content=policyText.content, fileName=policyText.fileName, createdBy=user, updatedBy=user, category=policy.category)
 
 
 def createControls(project):
 
     projectControlNames = set()
 
-    for exlControl in project.excludedControls:
-        print(int(exlControl))
+    #print("Excluidas:", project.excludedControls)
+    #for exlControl in project.excludedControls:
+    #    print(int(exlControl))
+    projectExcludedControls = [int(value) for value in project.excludedControls]
+
+
 
     controls = Control.objects.all()
     for control in controls:
@@ -367,16 +396,20 @@ def createControls(project):
             #else:
             #    excluded=False
             
+
             
+            for exlControl in projectExcludedControls:
+                if int(control.orderControl) == int(exlControl):
+                    excluded = True
+                    break
+                           
             
             #print("Creando el Control al Proyecto")
-            projectControl = ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=excluded)
+            projectControl = ProjectControl.objects.create(project=project, control=control, orderProjectControl=control.orderControl, excluded=excluded, category=projectPolicy.category)
             projectControl.projectPolicies.add(projectPolicy)
             projectControl.save()
             #print("Crear ProjectControl", projectControl)
             projectControlNames.add(control.name.upper())
-            
-
 
 
 class ProjectListView(ListView):
@@ -464,6 +497,23 @@ def projectCharts(request):
 
 
 @login_required
+def policiesVsControlsCharts(request):
+    # Filter by Current User
+    projectsUser = Project.objects.filter(createdBy=request.user)
+    projects = list(projectsUser.values())
+    context = {'projects': projects}
+    return render(request, 'core/policiesVsControlsCharts.html', context)
+
+@login_required
+def projectCategoryCharts(request):
+    # Filter by Current User
+    projectsUser = Project.objects.filter(createdBy=request.user)
+    projects = list(projectsUser.values())
+    context = {'projects': projects, 'categories': categories}
+    return render(request, 'core/projectCategoryCharts.html', context)
+
+
+@login_required
 def policiesList(request, projectId):
     # Filter by Current User
     projectUser = Project.objects.get(id=projectId)
@@ -478,6 +528,95 @@ def policiesList(request, projectId):
             ['Borrador', draft],
         ]}
     return JsonResponse(data)
+
+@login_required
+def controlsList(request, projectId):
+    # Filter by Current User
+    projectUser = Project.objects.get(id=projectId)
+    #draft = (ProjectControl.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Borrador", excluded=False)).count()
+    #approved = (ProjectControl.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Aprobado", excluded=False)).count()
+    #deprecated = (ProjectControl.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Descontinuado",excluded=False)).count()
+    
+    draft = (ProjectControl.objects.filter(project=projectUser, status="Borrador", excluded=False)).count()
+    approved = (ProjectControl.objects.filter(project=projectUser, status="Aprobado", excluded=False)).count()
+    deprecated = (ProjectControl.objects.filter(project=projectUser, status="Descontinuado",excluded=False)).count()
+
+    data = {'controls': [
+            ['Controles', 'Estados'],
+            ['Aprobado', approved],
+            ['Descontinuado', deprecated],
+            ['Borrador', draft],
+        ]}
+    return JsonResponse(data)
+
+@login_required
+def vanillaPoliciesList(request):
+    # Filter by Current User
+    controls = Control.objects.all()
+    controlsJson = {'Uso Aceptable': 0,'Control de Acceso': 0,'Copias de seguridad y restauración': 0,'Traiga su Propio Dispositivo (BYOD)': 0,'Continuidad del Negocio y Recuperación ante Desastres': 0,'Gestión de Cambios': 0,'Atención al cliente y SLA': 0,'Integridad de Datos': 0,'Retención y Eliminación de Datos': 0,'Administración de Incidentes': 0,'Clasificación de la Información': 0,'Seguridad de la Información': 0,'Uso Aceptable': 0,'Política Interna de Privacidad': 0,'Gestión de Activos de TI': 0,'Gestión de Claves y Criptografía': 0,'Registro y Monitoreo': 0,'Seguridad de Red': 0,'Seguridad del personal': 0,'Seguridad Física y Ambiental': 0,'Evaluación de Riesgos': 0,'Seguridad de Servidores': 0,'Desarrollo de Software': 0,'Manejo y Eliminación de Equipos Tecnológicos': 0,'Gestión de Proveedores': 0,'Gestión de Pruebas de Vulnerabilidad y Penetración': 0,'Trabajo desde Casa': 0,'Estación de Trabajo y Dispositivo Móvil': 0, 'Auditoría Interna': 0}
+    for control in controls:
+        try:
+            controlFixed = control.policy.name.replace("\xa0", " ")
+            controlsJson[controlFixed] += 1
+        except:
+            pass
+        
+   
+    controlsArray = []
+    for key, value in controlsJson.items():
+        controlsArray.append([key, value])
+
+    data = {'policies': controlsArray}
+    return JsonResponse(data)
+
+@login_required
+def categoriesList(request, projectId):
+    # Filter by Current User
+    
+    projectUser = Project.objects.get(id=projectId)
+
+    
+    
+    categoryJson = {'policies': [], 'controls': []}
+
+    for category in categories:
+
+        draft = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Borrador", excluded=False, category=category)).count()
+        approved = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Aprobado", excluded=False, category=category)).count()
+        deprecated = (ProjectPolicy.objects.filter(project=projectUser, createdBy=projectUser.createdBy, status="Descontinuado",excluded=False, category=category)).count()
+
+        if draft == 0 and approved == 0 and deprecated == 0:
+            draft = 0.0000001
+            approved = 0.0000001
+            deprecated = 0.0000001
+
+        categoryJson['policies'].append([
+            [category, 'Estados'],
+            ['Aprobado', approved],
+            ['Descontinuado', deprecated],
+            ['Borrador', draft]
+        ])
+
+
+        draftControl = (ProjectControl.objects.filter(project=projectUser, status="Borrador", category=category)).count()
+        approvedControl = (ProjectControl.objects.filter(project=projectUser, status="Aprobado", category=category)).count()
+        deprecatedControl = (ProjectControl.objects.filter(project=projectUser, status="Descontinuado",category=category)).count()
+
+        if draftControl == 0 and approvedControl == 0 and deprecatedControl == 0:
+            draftControl = 0.0000001
+            approvedControl = 0.0000001
+            deprecatedControl = 0.0000001
+    
+        categoryJson['controls'].append([
+            [category, 'Estados'],
+            ['Aprobado', approvedControl],
+            ['Descontinuado', deprecatedControl],
+            ['Borrador', draftControl]
+        ])
+
+    data = categoryJson
+    return JsonResponse(data)
+
 
 ### AUTENTICACIÓN, REGISTRO, VALIDACIÓN DE USUARIOS
 

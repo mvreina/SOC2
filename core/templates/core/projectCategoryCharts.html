@@ -1,0 +1,180 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div class="d-flex mt-4">
+        <div class="p-2  flex-grow-1">
+            <h3 class="title-type1">Estadísticas por categorpía</h3>
+        </div>
+        <!--div class="p-2"><a class="btn btn-primary btn-sm" href="{% url 'projectCreate' %}"><i class="bi bi-plus-square"></i> Crear Proyecto</a></div-->
+    </div>
+</div>
+
+<hr class="rules">
+
+<!-- Sección de Mensajes-->
+{% if messages %}
+{% for message in messages %}
+<div class="container">
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+
+<rect x="366" y="58" width="134" height="31" stroke="none" stroke-width="0" fill-opacity="0" fill="#ffffff"></rect>
+
+<div class="container mb-3">
+    <select class="form-select" aria-label="Proyecto" id="projectSelect">
+        <option value="0" selected>Seleccione un proyecto</option>
+        {% for project in projects %}
+        <option value="{{ project.id }}">{{ project.name|safe }}</option>
+        {% endfor %}
+    </select>
+</div>
+
+
+
+
+<div class="container text-center">
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Control de Acceso</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy1" class="col">
+                    </div>
+                    <div id="pieChartControl1" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Gestión de Activos</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy2" class="col">
+                    </div>
+                    <div id="pieChartControl2" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Auditoría y Cumplimiento</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy3" class="col">
+                    </div>
+                    <div id="pieChartControl3" class="col"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Continuidad del Negocio</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy4" class="col">
+                    </div>
+                    <div id="pieChartControl4" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Privacidad de Datos</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy5" class="col">
+                    </div>
+                    <div id="pieChartControl5" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Seguridad de Datos</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy6" class="col">
+                    </div>
+                    <div id="pieChartControl6" class="col"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Información y Comunicación</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy7" class="col">
+                    </div>
+                    <div id="pieChartControl7" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Organización y Gestión</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy8" class="col">
+                    </div>
+                    <div id="pieChartControl8" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-header">Gestión de Riesgos</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy9" class="col">
+                    </div>
+                    <div id="pieChartControl9" class="col"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col col-4">
+            <div class="card">
+                <div class="card-header">Seguridad en el Desarrollo del Ciclo de Vida del Software (SDLC)</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy10" class="col">
+                    </div>
+                    <div id="pieChartControl10" class="col"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col col-4">
+            <div class="card">
+                <div class="card-header">Operaciones de Seguridad</div>
+                <div class="card-body row">
+                    <div id="pieChartPolicy11" class="col">
+                    </div>
+                    <div id="pieChartControl11" class="col"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<div id="error-message" style="color: red;"></div>
+
+
+<!-- Google Charts JS -->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- Custom JS -->
+{% load static %}
+<script src="{% static 'js/projectCategoryCharts.js' %}"></script>
+
+
+
+{% endblock %}

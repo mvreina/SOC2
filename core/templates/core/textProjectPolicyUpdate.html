@@ -7,10 +7,18 @@
         {% csrf_token %}
         <div class="container">
             <div class="d-flex mt-4">
-                <div class="p-2  flex-grow-1"><h3 class="title-type1">Editor de política {{ projectpolicy.project.name|safe }}</h3></div>
-                <div class="p-2"><button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save"></i> Guardar Política</button></div>
-                <div class="p-2"><button onclick="export2Doc3('{{ form.content.value|escapejs }}', '{{ projectpolicy.fileName }}');" class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i> Descargar Política</button></div>
-                <div class="p-2"><a class="btn btn-outline-primary btn-sm" href="/projectRead/{{ projectpolicy.project.id }}/"><i class="bi bi-box-arrow-in-left"></i> Regresar al Proyecto</a></div>
+                <div class="p-2  flex-grow-1">
+                    <h3 class="title-type1">Editor de política {{ projectpolicy.project.name|safe }}</h3>
+                </div>
+                <div class="p-2"><button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal"
+                        data-bs-target="#staticBackdrop"><i class="bi bi-save"></i> Guardar Política</button></div>
+                <div class="p-2"><button
+                        onclick="export2Doc3('{{ form.content.value|escapejs }}', '{{ projectpolicy.fileName }}');"
+                        class="btn btn-primary btn-sm"><i class="bi bi-file-earmark-richtext"></i> Descargar
+                        Política</button></div>
+                <div class="p-2"><a class="btn btn-outline-primary btn-sm"
+                        href="/projectRead/{{ projectpolicy.project.id }}/"><i class="bi bi-box-arrow-in-left"></i>
+                        Regresar al Proyecto</a></div>
                 <div class="p-2"><label for="id_status">Estado:</label></div>
                 <div class="p-2">{{ form.status }}</div>
             </div>
@@ -26,7 +34,7 @@
             {% for message in messages %}
             <div class="p-2">
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
+                    <!--div class="alert alert-danger alert-dismissible fade show" role="alert"-->
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
@@ -34,39 +42,37 @@
             {% endfor %}
             {% endif %}
         </div>
-            
-        
-    </form>
-    
-    
-    <!-- Add a download button that links to the download view -->
 
-    
+
+        <!-- Modal Confirmación de guardado -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="staticBackdropLabel">La política sugerida tuvo cambios</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        ¿Desea guardarlos?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="staticBackdropLabel">MODAL - MODIFICACIÓN FECHA FIN</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            MODAL - MODIFICACIÓN FECHA FIN
-            JUSTIFICACION
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-primary">Guardar</button>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
 <script>
-   
-    
+
+
     function export2Doc3(htmlContent, filename) {
         // Convert HTML to a DOCX document
         //console.log(htmlContent);
@@ -79,7 +85,7 @@
         a.download = filename;
         a.click();
     }
-    
+
 
 
 

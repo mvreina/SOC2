@@ -37,6 +37,11 @@ urlpatterns = [
     path('projectControlPolicyUpdate/<int:pk>/', login_required(views.ProjectControlPolicyUpdateView.as_view()), name='projectControlPolicyUpdate'),
     #Graficas
     path('projectCharts/', views.projectCharts, name='projectCharts'),
+    path('controlsList/<int:projectId>/', views.controlsList, name='controlsList'),
+    path('policiesVsControlsCharts/', views.policiesVsControlsCharts, name='policiesVsControlsCharts'),
+    path('vanillaPoliciesList/', views.vanillaPoliciesList, name='vanillaPoliciesList'),
+    path('projectCategoryCharts/', views.projectCategoryCharts, name='projectCategoryCharts'),
+    path('categoriesList/<int:projectId>/', views.categoriesList, name='categoriesList'),
     #Usuarios
     path('logout/', views.exit, name='exit'),
     path('register/', views.registerEmail, name='register'),

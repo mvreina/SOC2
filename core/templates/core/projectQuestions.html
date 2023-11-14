@@ -30,7 +30,7 @@
                                     {% if project.numQuestion < totalQuestions %}
                                         <button class="btn btn-primary btn-sm bi bi-arrow-right-square" type="submit" name="next"> Siguiente</button>
                                     {% else %}
-                                        <button class="btn btn-primary btn-sm bi bi-arrow-bar-right" type="submit" name="finish" onclick="showSpinner(); makeAjaxRequest();"> 
+                                        <button class="btn btn-primary btn-sm bi bi-arrow-bar-right" type="submit" name="finish" onclick="showSpinner(); makeAjaxRequest();" data-bs-toggle="modal" data-bs-target="#yourModal"> 
                                              Terminar
                                             <span id="spinner" class="spinner-border spinner-border-sm" aria-hidden="false"style="display: none;"></span>
                                         </button>
@@ -104,6 +104,28 @@
     </div>
     {% endfor %}
 {% endif %}
+
+
+<!-- Your modal HTML with a spinner -->
+<div class="modal fade" id="yourModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="yourModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="yourModalLabel">Un momento!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bootstrap spinner -->
+                Se están creando las políticas y los controles para este proyecto
+            </div>
+            <div class="modal-footer">
+                <div class="spinner-grow text-secondary spinner-border-sm" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>                  
+            </div>
+        </div>
+    </div>
+</div>
 
 
 <script>
